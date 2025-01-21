@@ -10,7 +10,7 @@ impl<T> BFCode<T>
         let mut stack: Vec<(usize, usize, usize)> = vec![];
 
         let mut line = 1usize;
-        let mut row = 1usize;
+        let mut row = 0usize;
 
         macro_rules! wrapping_push {
             ($vector:expr, $code:path) => {
@@ -51,7 +51,7 @@ impl<T> BFCode<T>
                 ParseError::IO{source: e}
             })?;
 
-            if byte == b'\n' { line += 1; row = 1; continue; }
+            if byte == b'\n' { line += 1; row = 0; continue; }
             row += 1;
 
             match byte {
