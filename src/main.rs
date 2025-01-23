@@ -1,4 +1,5 @@
 mod bfir;
+mod celltype;
 mod error;
 mod interp;
 

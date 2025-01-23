@@ -1,6 +1,6 @@
 use crate::error::*;
-use super::bfcode::BFCode;
-use super::celltype::BFCell;
+use crate::celltype::BFCell;
+use crate::bfir::bfcode::BFCode;
 
 
 impl<T> BFCode<T>
@@ -12,15 +12,15 @@ impl<T> BFCode<T>
         let mut line = 1usize;
         let mut row = 0usize;
 
+
         macro_rules! wrapping_push {
             ($vector:expr, $code:path) => {
                 if let Some($code(n)) = $vector.last() {
-                    // Pre dereference reference "n" to end the lifetime of immutable
-                    // reference and avoid conflicts with mutable reference "last"
-                    let n = *n;
-
+                    let mut new_n = n.clone();
                     let last = $vector.last_mut().unwrap();
-                    *last = $code(n + (T::one()));
+
+                    new_n.add(T::one());
+                    *last = $code(new_n);
                 } else {
                     $vector.push($code(T::one()));
                 }
@@ -46,6 +46,7 @@ impl<T> BFCode<T>
             };
         }
 
+
         for byte in source_codes.bytes() {
             let byte = byte.map_err(|e| {
                 ParseError::IO{source: e}
@@ -61,8 +62,10 @@ impl<T> BFCode<T>
                 b'>' => { unwrapping_push!(codes, BFCode::<T>::RightShift) },
                 b',' => { codes.push(BFCode::<T>::Input) },
                 b'.' => { codes.push(BFCode::<T>::Output) },
+
                 b'[' => { stack.push( (codes.len(), line, row) );
                           codes.push( BFCode::<T>::Jz(usize::MAX) ); },
+
                 b']' => {
                     if let Some(left_bracket_data) = stack.pop() {
                         codes[left_bracket_data.0] =
@@ -76,6 +79,7 @@ impl<T> BFCode<T>
                         });
                     }
                 },
+
                 _ => {}
             }
         }
@@ -104,16 +108,12 @@ mod tests {
     fn test_bfcode_parse() {
         let error_func = |e| panic!("Parse Error: {}", e);
         let ok_func    = |v| v;
-
-        // test the parse function
-        let source_codes = BufReader::new("+-<>,.[]".as_bytes());
-        let parsed_codes = BFCode::<u8>::parse(source_codes).map_or_else(
-            error_func,
-            ok_func
-        );
+        let new_frame  = |s: &str| BFCode::<u8>::parse(
+                BufReader::new(s.as_bytes())
+            ).map_or_else(error_func, ok_func);
 
         assert_eq!(
-            parsed_codes,
+            new_frame("+-<>,.[]"),
             vec![
                 AddCell(1),
                 SubCell(1),
@@ -126,15 +126,8 @@ mod tests {
             ]
         );
 
-        // test the merge function
-        let source_codes = BufReader::new("-<<<+++--><++>>>".as_bytes());
-        let parsed_codes = BFCode::<u8>::parse(source_codes).map_or_else(
-            error_func,
-            ok_func
-        );
-
         assert_eq!(
-            parsed_codes,
+            new_frame("-<<<+++--><++>>>"),
             vec![
                 SubCell(1),
                 LeftShift(3),
@@ -147,15 +140,8 @@ mod tests {
             ]
         );
 
-        // test the brackets match function
-        let source_codes = BufReader::new("[[][[[][[]][]]]]".as_bytes());
-        let parsed_codes = BFCode::<u8>::parse(source_codes).map_or_else(
-            error_func,
-            ok_func
-        );
-
         assert_eq!(
-            parsed_codes,
+            new_frame("[[][[[][[]][]]]]"),
             vec![
                 Jz(15),   // 0
                 Jz(2),    // 1

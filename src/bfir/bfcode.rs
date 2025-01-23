@@ -1,4 +1,4 @@
-use super::celltype::BFCell;
+use crate::celltype::BFCell;
 
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
