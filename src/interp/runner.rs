@@ -12,6 +12,7 @@ pub struct BFVM<T: BFCell> {
 
 impl<T: BFCell> BFVM<T> {
     fn new(size: usize, ptr: usize) -> Self {
+        if size == 0 { panic!("ValueError: Illegal parameter \"size\"") }
         if ptr >= size { panic!("ValueError: Illegal parameter \"ptr\"") }
         BFVM { array: vec![T::zero(); size], ptr }
     }
@@ -25,10 +26,10 @@ impl<T: BFCell> BFVM<T> {
             AddCell(n) => cell.add(n),
             SubCell(n) => cell.sub(n),
 
-            LeftShift(n) => if *ptr > n { *ptr -= n; } else {
+            LeftShift(n) => if *ptr >= n { *ptr -= n; } else {
                 return Err(VMError::PointerOverflow {
                     info: "Overflow on left".to_string() }); },
-            RightShift(n) => if len - *ptr >= n { *ptr += n; } else {
+            RightShift(n) => if len - *ptr > n { *ptr += n; } else {
                 return Err(VMError::PointerOverflow {
                     info: "Overflow on right".to_string() }); },
 
