@@ -23,3 +23,15 @@ pub enum VMError {
     CellOverflow { info: String },
 }
 
+#[derive(Error, Debug)]
+pub enum InterpError {
+    #[error("{source}")]
+    Parse { #[from] source: ParseError },
+
+    #[error("{source}")]
+    VM { #[from] source: VMError },
+
+    #[error("IO error: {source}")]
+    IO { #[from] source: std::io::Error },
+}
+

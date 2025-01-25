@@ -1,14 +1,16 @@
+use std::fs::File;
+use std::io::{Cursor, BufReader, self};
+
 use super::*;
 use crate::bfir::BFCode::*;
 use crate::celltype::BFCell;
-use crate::error::VMError;
+use crate::error::{InterpError, VMError};
 
 
 pub struct BFVM<T: BFCell> {
     array: Vec<T>,
     ptr  : usize,
 }
-
 
 impl<T: BFCell> BFVM<T> {
     fn new(size: usize, ptr: usize) -> Self {
@@ -49,7 +51,6 @@ impl<T: BFCell> BFVM<T> {
         Ok(())
     }
 
-
     fn run(&mut self, bfinput: &mut impl std::io::Read, bfoutput: &mut impl std::io::Write, frame: &mut BFFrame<T>) -> Result<(), VMError> {
         while *frame.pc() < frame.codes().len() {
             self.simple_step(bfinput, bfoutput, frame)?;
@@ -59,12 +60,36 @@ impl<T: BFCell> BFVM<T> {
     }
 }
 
+
+pub fn run_bf_file(name: String, size: usize, ptr: usize) -> Result<(), InterpError> {
+    let     f      = File::open(name)?;
+    let mut code   = BFFrame::<u8>::new(BufReader::new(f))?;
+    let mut vm     = BFVM::<u8>::new(size, ptr);
+    let mut stdin  = io::stdin();
+    let mut stdout = io::stdout();
+
+    vm.run(&mut stdin, &mut stdout, &mut code)?;
+
+    Ok(())
+}
+
+pub fn run_bf_string(code: String, size: usize, ptr: usize) -> Result<(), InterpError> {
+    let mut code   = BFFrame::<u8>::new(Cursor::new(code))?;
+    let mut vm     = BFVM::<u8>::new(size, ptr);
+    let mut stdin  = io::stdin();
+    let mut stdout = io::stdout();
+
+    vm.run(&mut stdin, &mut stdout, &mut code)?;
+
+    Ok(())
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::bfir::BFCode;
     use std::io::BufReader;
-    use std::io::Cursor;
 
     #[test]
     fn test_runner() {
