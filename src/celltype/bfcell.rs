@@ -1,5 +1,3 @@
-use super::*;
-
 pub trait BFCell: Clone + Copy + Eq + PartialEq {
     fn zero() -> Self;
     fn one() -> Self;

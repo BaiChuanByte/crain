@@ -3,7 +3,7 @@ use std::io::{BufReader, Cursor};
 
 use super::*;
 use crate::bfir::BFCode::*;
-use crate::celltype::BFCell;
+use crate::celltype::*;
 use crate::error::{InterpError, VMError};
 
 pub struct BFVM<T: BFCell> {
@@ -96,8 +96,8 @@ impl<T: BFCell> BFVM<T> {
 
 pub fn run_bf_file(name: String, size: usize, ptr: usize) -> Result<(), InterpError> {
     let f = File::open(name)?;
-    let mut code = BFFrame::<u8>::new(BufReader::new(f))?;
-    let mut vm = BFVM::<u8>::new(size, ptr);
+    let mut code = BFFrame::<Cell8>::new(BufReader::new(f))?;
+    let mut vm = BFVM::<Cell8>::new(size, ptr);
     let mut stdin = std::io::stdin();
     let mut stdout = std::io::stdout();
 
@@ -107,8 +107,8 @@ pub fn run_bf_file(name: String, size: usize, ptr: usize) -> Result<(), InterpEr
 }
 
 pub fn run_bf_string(code: String, size: usize, ptr: usize) -> Result<(), InterpError> {
-    let mut code = BFFrame::<u8>::new(Cursor::new(code))?;
-    let mut vm = BFVM::<u8>::new(size, ptr);
+    let mut code = BFFrame::<Cell8>::new(Cursor::new(code))?;
+    let mut vm = BFVM::<Cell8>::new(size, ptr);
     let mut stdin = std::io::stdin();
     let mut stdout = std::io::stdout();
 
@@ -120,19 +120,18 @@ pub fn run_bf_string(code: String, size: usize, ptr: usize) -> Result<(), Interp
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::bfir::BFCode;
     use std::io::BufReader;
 
     #[test]
     fn test_runner() {
-        let mut vm = BFVM::<u8>::new(10, 0);
-        let mut input = Cursor::new(Vec::<u8>::new());
-        let mut output = Cursor::new(Vec::<u8>::new());
+        let mut vm = BFVM::<Cell8>::new(10, 0);
+        let mut input = Cursor::new(Vec::<Cell8>::new());
+        let mut output = Cursor::new(Vec::<Cell8>::new());
 
         let error_func = |e| panic!("Parse Error: {e}");
         let ok_func = |v| v;
         let new_frame = |s: &str| {
-            BFFrame::<u8>::new(BufReader::new(s.as_bytes())).map_or_else(error_func, ok_func)
+            BFFrame::<Cell8>::new(BufReader::new(s.as_bytes())).map_or_else(error_func, ok_func)
         };
 
         let mut frame = new_frame("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++.[-]++++++++++.[-]");
@@ -140,6 +139,6 @@ mod tests {
         vm.run(&mut input, &mut output, &mut frame)
             .map_or_else(|e| panic!("VM Error: {e}"), |v| v);
 
-        assert_eq!(*output.get_ref(), Vec::<u8>::from("Crain\n"));
+        assert_eq!(*output.get_ref(), Vec::<Cell8>::from("Crain\n"));
     }
 }

@@ -1,5 +1,3 @@
-use super::*;
-
 use crate::bfir::BFCode;
 use crate::celltype::BFCell;
 use crate::error::ParseError;

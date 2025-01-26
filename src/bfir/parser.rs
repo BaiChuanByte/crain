@@ -102,13 +102,15 @@ where
 mod tests {
     use super::*;
     use crate::bfir::BFCode::*;
+    use crate::celltype::Cell8;
+    use std::io::BufReader;
 
     #[test]
     fn test_bfcode_parse() {
         let error_func = |e| panic!("Parse Error: {}", e);
         let ok_func = |v| v;
         let new_frame = |s: &str| {
-            BFCode::<u8>::parse(BufReader::new(s.as_bytes())).map_or_else(error_func, ok_func)
+            BFCode::<Cell8>::parse(BufReader::new(s.as_bytes())).map_or_else(error_func, ok_func)
         };
 
         assert_eq!(
