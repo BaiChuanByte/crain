@@ -26,9 +26,9 @@ pub enum VMError {
 
     #[error("Pointer Overflow: {info}")]
     PointerOverflow { info: String },
-
-    #[error("Cell Overflow: {info}")]
-    CellOverflow { info: String },
+    // It maybe used in the future.
+    //  #[error("Cell Overflow: {info}")]
+    //  CellOverflow { info: String },
 }
 
 #[derive(Error, Debug)]

@@ -17,10 +17,10 @@ macro_rules! impl_bfcell {
             }
 
             fn add(&mut self, rhs: Self) {
-                *self = *self + rhs;
+                *self = self.wrapping_add(rhs);
             }
             fn sub(&mut self, rhs: Self) {
-                *self = *self - rhs;
+                *self = self.wrapping_sub(rhs);
             }
 
             fn iszero(self) -> bool {
