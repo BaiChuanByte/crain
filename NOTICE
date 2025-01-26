@@ -1,0 +1,10 @@
+This project is licensed under the MIT License.
+
+However, some files in this project are provided under WTFPL License.
+Specifically:
+
+- Files in the `example` directory are licensed under the WTFPL License.
+- Brainfuck code used for testing is licensed under the WTFPL License.
+
+Please refer to the individual files for more detailed licensing information.
+
