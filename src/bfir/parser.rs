@@ -1,17 +1,17 @@
-use crate::error::*;
-use crate::celltype::BFCell;
 use crate::bfir::bfcode::BFCode;
-
+use crate::celltype::BFCell;
+use crate::error::*;
 
 impl<T> BFCode<T>
-    where T: BFCell {
+where
+    T: BFCell,
+{
     pub fn parse(source_codes: impl std::io::BufRead) -> Result<Vec<BFCode<T>>, ParseError> {
         let mut codes = vec![];
         let mut stack: Vec<(usize, usize, usize)> = vec![];
 
         let mut line = 1usize;
         let mut row = 0usize;
-
 
         macro_rules! wrapping_push {
             ($vector:expr, $code:path) => {
@@ -46,46 +46,48 @@ impl<T> BFCode<T>
             };
         }
 
-
         for byte in source_codes.bytes() {
-            let byte = byte.map_err(|e| {
-                ParseError::IO{source: e}
-            })?;
+            let byte = byte.map_err(|e| ParseError::IO { source: e })?;
 
-            if byte == b'\n' { line += 1; row = 0; continue; }
+            if byte == b'\n' {
+                line += 1;
+                row = 0;
+                continue;
+            }
             row += 1;
 
             match byte {
-                b'+' => { wrapping_push!(codes, BFCode::<T>::AddCell) },
-                b'-' => { wrapping_push!(codes, BFCode::<T>::SubCell) },
-                b'<' => { unwrapping_push!(codes, BFCode::<T>::LeftShift) },
-                b'>' => { unwrapping_push!(codes, BFCode::<T>::RightShift) },
-                b',' => { codes.push(BFCode::<T>::Input) },
-                b'.' => { codes.push(BFCode::<T>::Output) },
+                b'+' => wrapping_push!(codes, BFCode::<T>::AddCell),
+                b'-' => wrapping_push!(codes, BFCode::<T>::SubCell),
+                b'<' => unwrapping_push!(codes, BFCode::<T>::LeftShift),
+                b'>' => unwrapping_push!(codes, BFCode::<T>::RightShift),
+                b',' => codes.push(BFCode::<T>::Input),
+                b'.' => codes.push(BFCode::<T>::Output),
 
-                b'[' => { stack.push( (codes.len(), line, row) );
-                          codes.push( BFCode::<T>::Jz(usize::MAX) ); },
+                b'[' => {
+                    stack.push((codes.len(), line, row));
+                    codes.push(BFCode::<T>::Jz(usize::MAX));
+                }
 
                 b']' => {
                     if let Some(left_bracket_data) = stack.pop() {
-                        codes[left_bracket_data.0] =
-                            BFCode::<T>::Jz(codes.len());
+                        codes[left_bracket_data.0] = BFCode::<T>::Jz(codes.len());
                         codes.push(BFCode::<T>::Jnz(left_bracket_data.0));
                     } else {
-                        return Err(ParseError::MismatchedBracket{
+                        return Err(ParseError::MismatchedBracket {
                             bracket: ']',
                             line,
                             row,
                         });
                     }
-                },
+                }
 
                 _ => {}
             }
         }
 
         if let Some(left_bracket_data) = stack.pop() {
-            return Err(ParseError::MismatchedBracket{
+            return Err(ParseError::MismatchedBracket {
                 bracket: '[',
                 line: left_bracket_data.1,
                 row: left_bracket_data.2,
@@ -96,21 +98,18 @@ impl<T> BFCode<T>
     }
 }
 
-
-
 #[cfg(test)]
 mod tests {
-    use std::io::BufReader;
-    use crate::bfir::BFCode::*;
     use super::*;
+    use crate::bfir::BFCode::*;
 
     #[test]
     fn test_bfcode_parse() {
         let error_func = |e| panic!("Parse Error: {}", e);
-        let ok_func    = |v| v;
-        let new_frame  = |s: &str| BFCode::<u8>::parse(
-                BufReader::new(s.as_bytes())
-            ).map_or_else(error_func, ok_func);
+        let ok_func = |v| v;
+        let new_frame = |s: &str| {
+            BFCode::<u8>::parse(BufReader::new(s.as_bytes())).map_or_else(error_func, ok_func)
+        };
 
         assert_eq!(
             new_frame("+-<>,.[]"),
@@ -143,24 +142,23 @@ mod tests {
         assert_eq!(
             new_frame("[[][[[][[]][]]]]"),
             vec![
-                Jz(15),   // 0
-                Jz(2),    // 1
-                Jnz(1),   // 2
-                Jz(14),   // 3
-                Jz(13),   // 4
-                Jz(6),    // 5
-                Jnz(5),   // 6
-                Jz(10),   // 7
-                Jz(9),    // 8
-                Jnz(8),   // 9
-                Jnz(7),   // 10
-                Jz(12),   // 11
-                Jnz(11),  // 12
-                Jnz(4),   // 13
-                Jnz(3),   // 14
-                Jnz(0),   // 15
+                Jz(15),  // 0
+                Jz(2),   // 1
+                Jnz(1),  // 2
+                Jz(14),  // 3
+                Jz(13),  // 4
+                Jz(6),   // 5
+                Jnz(5),  // 6
+                Jz(10),  // 7
+                Jz(9),   // 8
+                Jnz(8),  // 9
+                Jnz(7),  // 10
+                Jz(12),  // 11
+                Jnz(11), // 12
+                Jnz(4),  // 13
+                Jnz(3),  // 14
+                Jnz(0),  // 15
             ]
         );
     }
 }
-

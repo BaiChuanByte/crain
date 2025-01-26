@@ -5,7 +5,6 @@ mod interp;
 
 use clap::*;
 
-
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
@@ -31,7 +30,7 @@ enum Commands {
         /// The position of ptr (start from 0).
         #[clap(short, long, default_value_t = 0)]
         ptr: usize,
-    }
+    },
 }
 
 #[derive(Args, Debug)]
@@ -46,19 +45,35 @@ pub struct RunMode {
     string: bool,
 }
 
-
 pub fn main_func() {
     let command = Args::parse().command;
     let err;
 
     match command {
-        Commands::Run { mode: RunMode { file: _ /* true or false */, string: false }, file_or_string, size, ptr } => {
+        Commands::Run {
+            mode:
+                RunMode {
+                    file: _, // true or false (because file mode is default)
+                    string: false,
+                },
+            file_or_string,
+            size,
+            ptr,
+        } => {
             err = interp::run_bf_file(file_or_string, size, ptr);
-        },
+        }
 
-        Commands::Run { mode: RunMode { file: false, string: true }, file_or_string, size, ptr } => {
+        Commands::Run {
+            mode: RunMode {
+                file: false,
+                string: true,
+            },
+            file_or_string,
+            size,
+            ptr,
+        } => {
             err = interp::run_bf_string(file_or_string, size, ptr);
-        },
+        }
 
         Commands::Run { .. } => unreachable!(),
     }
@@ -68,4 +83,3 @@ pub fn main_func() {
         std::process::exit(1);
     }
 }
-

@@ -1,6 +1,5 @@
 use super::*;
 
-
 pub trait BFCell: Clone + Copy + Eq + PartialEq {
     fn zero() -> Self;
     fn one() -> Self;
@@ -13,4 +12,3 @@ pub trait BFCell: Clone + Copy + Eq + PartialEq {
     fn input(&mut self, bfinput: &mut impl std::io::Read) -> Result<(), std::io::Error>;
     fn output(self, bfoutput: &mut impl std::io::Write) -> Result<(), std::io::Error>;
 }
-
