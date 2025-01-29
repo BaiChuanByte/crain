@@ -1,0 +1,5 @@
+# Specify EOL normalization on different platform.
+
+* text=auto eol=lf
+windows/**/* text=auto eol=crlf
+
