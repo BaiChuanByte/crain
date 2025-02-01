@@ -12,7 +12,7 @@ pub struct BFVM<T: BFCell> {
 }
 
 impl<T: BFCell> BFVM<T> {
-    fn new(size: usize, ptr: usize) -> Self {
+    pub fn new(size: usize, ptr: usize) -> Self {
         if size == 0 {
             panic!("ValueError: Illegal parameter \"size\"")
         }
@@ -25,7 +25,7 @@ impl<T: BFCell> BFVM<T> {
         }
     }
 
-    fn simple_step(
+    pub fn simple_step(
         &mut self,
         bfinput: &mut impl std::io::Read,
         bfoutput: &mut impl std::io::Write,
@@ -80,7 +80,7 @@ impl<T: BFCell> BFVM<T> {
         Ok(())
     }
 
-    fn run(
+    pub fn run(
         &mut self,
         bfinput: &mut impl std::io::Read,
         bfoutput: &mut impl std::io::Write,
