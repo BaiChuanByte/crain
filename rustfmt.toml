@@ -24,4 +24,3 @@ use_try_shorthand = true
 use_field_init_shorthand = true
 force_explicit_abi = true
 print_misformatted_file_names = true
-
