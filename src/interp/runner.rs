@@ -2,16 +2,29 @@ use std::fs::File;
 use std::io::{BufReader, Cursor};
 
 use super::*;
-use crate::bfir::BFCode::*;
+use crate::bfir::BfCode::*;
 use crate::celltype::*;
-use crate::error::{InterpError, VMError};
+use crate::error::{InterpError, VmError};
 
-pub struct BFVM<T: BFCell> {
+/// The virtual machine used to run Brainfuck programs.
+///
+/// Brainfuck virtual machine. The construction is similar to the Turing machine, with a tape and a pointer.
+/// It is used to run Brainfuck programs.
+pub struct BfVm<T: BfCell> {
     array: Vec<T>,
     ptr: usize,
 }
 
-impl<T: BFCell> BFVM<T> {
+impl<T: BfCell> BfVm<T> {
+    /// News a BfVm.
+    ///
+    /// # Panics
+    /// it will cause a panic if you set size to zero, or set ptr to beyond the range of the array.
+    ///
+    /// # Examples
+    /// ```rust
+    /// crain::interp::BfVm::<crain::celltype::Cell8>::new(30000, 0);
+    /// ```
     pub fn new(size: usize, ptr: usize) -> Self {
         if size == 0 {
             panic!("ValueError: Illegal parameter \"size\"")
@@ -19,18 +32,47 @@ impl<T: BFCell> BFVM<T> {
         if ptr >= size {
             panic!("ValueError: Illegal parameter \"ptr\"")
         }
-        BFVM {
+        BfVm {
             array: vec![T::zero(); size],
             ptr,
         }
     }
 
+    /// Step through a BfFrame.
+    ///
+    /// Run a BfFrame, but only for a single step.
+    ///
+    /// # Failures
+    /// The function will return a `VmError` if:
+    /// 1. An error occurs during an IO operation.
+    /// 2. The pointer goes out of the array bounds.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use std::io::Cursor;
+    /// use crain::celltype::Cell8;
+    /// use crain::interp::{BfFrame, BfVm};
+    ///
+    /// let mut frame = BfFrame::<Cell8>::new(Cursor::new(
+    ///     "+.".as_bytes().to_vec()
+    /// ))?;
+    /// let mut vm = BfVm::new(1, 0);
+    ///
+    /// let mut input = Cursor::new("".as_bytes().to_vec());
+    /// let mut output = Cursor::new("".as_bytes().to_vec());
+    ///
+    /// vm.run(&mut input, &mut output, &mut frame)?;
+    /// vm.run(&mut input, &mut output, &mut frame)?;
+    ///
+    /// assert_eq!(*output.get_ref(), "\x01".as_bytes().to_vec());
+    /// # Ok::<(), crain::InterpError>(())
+    /// ```
     pub fn simple_step(
         &mut self,
         bfinput: &mut impl std::io::Read,
         bfoutput: &mut impl std::io::Write,
-        frame: &mut BFFrame<T>,
-    ) -> Result<(), VMError> {
+        frame: &mut BfFrame<T>,
+    ) -> Result<(), VmError> {
         let len = self.array.len();
         let ptr = &mut self.ptr;
         let cell = &mut self.array[*ptr];
@@ -43,7 +85,7 @@ impl<T: BFCell> BFVM<T> {
                 if *ptr >= n {
                     *ptr -= n;
                 } else {
-                    return Err(VMError::PointerOverflow {
+                    return Err(VmError::PointerOverflow {
                         info: "Overflow on left".to_string(),
                     });
                 }
@@ -52,16 +94,16 @@ impl<T: BFCell> BFVM<T> {
                 if len - *ptr > n {
                     *ptr += n;
                 } else {
-                    return Err(VMError::PointerOverflow {
+                    return Err(VmError::PointerOverflow {
                         info: "Overflow on right".to_string(),
                     });
                 }
             }
 
-            Input => cell.input(bfinput).map_err(|e| VMError::IO { source: e })?,
+            Input => cell.input(bfinput).map_err(|e| VmError::IO { source: e })?,
             Output => cell
                 .output(bfoutput)
-                .map_err(|e| VMError::IO { source: e })?,
+                .map_err(|e| VmError::IO { source: e })?,
 
             Jz(n) => {
                 if cell.iszero() {
@@ -80,12 +122,40 @@ impl<T: BFCell> BFVM<T> {
         Ok(())
     }
 
+    /// Run a BfFrame.
+    ///
+    /// Run the BfFrame until all the remaining code has been executed.
+    ///
+    /// # Failures
+    /// The function will return a `VmError` if:
+    /// 1. An error occurs during an IO operation.
+    /// 2. The pointer goes out of the array bounds.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use std::io::Cursor;
+    /// use crain::celltype::Cell8;
+    /// use crain::interp::{BfFrame, BfVm};
+    ///
+    /// let mut frame = BfFrame::<Cell8>::new(Cursor::new(
+    ///     "+++++++++++++[->+++++<]>.".as_bytes().to_vec()
+    /// ))?;
+    /// let mut vm = BfVm::new(2, 0);
+    ///
+    /// let mut input = Cursor::new("".as_bytes().to_vec());
+    /// let mut output = Cursor::new("".as_bytes().to_vec());
+    ///
+    /// vm.run(&mut input, &mut output, &mut frame)?;
+    ///
+    /// assert_eq!(*output.get_ref(), "A".as_bytes().to_vec());
+    /// # Ok::<(), crain::InterpError>(())
+    /// ```
     pub fn run(
         &mut self,
         bfinput: &mut impl std::io::Read,
         bfoutput: &mut impl std::io::Write,
-        frame: &mut BFFrame<T>,
-    ) -> Result<(), VMError> {
+        frame: &mut BfFrame<T>,
+    ) -> Result<(), VmError> {
         while *frame.pc() < frame.codes().len() {
             self.simple_step(bfinput, bfoutput, frame)?;
         }
@@ -96,8 +166,8 @@ impl<T: BFCell> BFVM<T> {
 
 pub fn run_bf_file(name: String, size: usize, ptr: usize) -> Result<(), InterpError> {
     let f = File::open(name)?;
-    let mut code = BFFrame::<Cell8>::new(BufReader::new(f))?;
-    let mut vm = BFVM::<Cell8>::new(size, ptr);
+    let mut code = BfFrame::<Cell8>::new(BufReader::new(f))?;
+    let mut vm = BfVm::<Cell8>::new(size, ptr);
     let mut stdin = std::io::stdin();
     let mut stdout = std::io::stdout();
 
@@ -107,10 +177,8 @@ pub fn run_bf_file(name: String, size: usize, ptr: usize) -> Result<(), InterpEr
 }
 
 pub fn run_bf_string(code: String, size: usize, ptr: usize) -> Result<(), InterpError> {
-    let mut code = BFFrame::<Cell8>::new(Cursor::new(code))?;
-    let mut vm = BFVM::<Cell8>::new(size, ptr);
-    let mut stdin = std::io::stdin();
-    let mut stdout = std::io::stdout();
+    let mut code = BfFrame::<Cell8>::new(Cursor::new(code))?;
+    let mut vm = BfVm::<Cell8>::new(size, ptr);                                             let mut stdin = std::io::stdin();                                                       let mut stdout = std::io::stdout();
 
     vm.run(&mut stdin, &mut stdout, &mut code)?;
 
@@ -124,14 +192,14 @@ mod tests {
 
     #[test]
     fn test_runner() {
-        let mut vm = BFVM::<Cell8>::new(10, 0);
-        let mut input = Cursor::new(Vec::<Cell8>::new());
-        let mut output = Cursor::new(Vec::<Cell8>::new());
+        let mut vm = BfVm::<Cell8>::new(10, 0);
+        let mut input = Cursor::new(Vec::<u8>::new());
+        let mut output = Cursor::new(Vec::<u8>::new());
 
         let error_func = |e| panic!("Parse Error: {e}");
         let ok_func = |v| v;
         let new_frame = |s: &str| {
-            BFFrame::<Cell8>::new(BufReader::new(s.as_bytes())).map_or_else(error_func, ok_func)
+            BfFrame::<Cell8>::new(BufReader::new(s.as_bytes())).map_or_else(error_func, ok_func)
         };
 
         let mut frame = new_frame(
@@ -146,7 +214,7 @@ mod tests {
         );
 
         vm.run(&mut input, &mut output, &mut frame)
-            .map_or_else(|e| panic!("VM Error: {e}"), |v| v);
+            .map_or_else(|e| panic!("Vm Error: {e}"), |v| v);
 
         assert_eq!(*output.get_ref(), Vec::<Cell8>::from("Crain"));
     }

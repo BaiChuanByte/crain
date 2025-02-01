@@ -1,30 +1,56 @@
-use crate::bfir::BFCode;
-use crate::celltype::BFCell;
+use crate::bfir::BfCode;
+use crate::celltype::BfCell;
 use crate::error::ParseError;
 
+/// An abstraction of a complete brainfuck program.
+///
+/// This structure can serve as an abstraction of a preprocessed brainfuck program
+/// that can be directly executed by the VM.
+/// The state during execution (such as the program counter) is also stored within this structure.
 #[derive(Debug)]
-pub struct BFFrame<T: BFCell> {
-    codes: Vec<BFCode<T>>,
+pub struct BfFrame<T: BfCell> {
+    codes: Vec<BfCode<T>>,
     pc: usize, // problem counter
 }
 
-impl<T> BFFrame<T>
+impl<T> BfFrame<T>
 where
-    T: BFCell,
+    T: BfCell,
 {
-    pub fn new(source_codes: impl std::io::BufRead) -> Result<BFFrame<T>, ParseError> {
+    /// News a BfFrame.
+    ///
+    /// # Failures
+    ///
+    /// The function will return a `ParseError` if:
+    /// 1. An error occurs during an IO operation.
+    /// 2. The left and right brackets do not match.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use std::io::Cursor;
+    /// use crain::interp::BfFrame;
+    /// use crain::celltype::Cell8;
+    ///
+    /// let frame = BfFrame::<Cell8>::new(Cursor::new("+-<>".to_string()))?;
+    /// # Ok::<(), crain::ParseError>(())
+    /// ```
+    pub fn new(source_codes: impl std::io::BufRead) -> Result<BfFrame<T>, ParseError> {
         Ok(Self {
-            codes: BFCode::parse(source_codes)?,
+            codes: BfCode::parse(source_codes)?,
             pc: 0,
         })
     }
 
-    pub fn codes(&self) -> &Vec<BFCode<T>> {
+    /// Returns the preprocessed brainfuck program in the frame.
+    pub fn codes(&self) -> &Vec<BfCode<T>> {
         &(self.codes)
     }
+    /// Returns the program counter in the frame.
     pub fn pc(&self) -> &usize {
         &(self.pc)
     }
+    /// Modify the program counter to implement jump.
     pub fn jump(&mut self, new_pc: usize) {
         self.pc = new_pc
     }

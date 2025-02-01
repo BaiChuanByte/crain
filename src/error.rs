@@ -17,7 +17,7 @@ pub enum ParseError {
 }
 
 #[derive(Error, Debug)]
-pub enum VMError {
+pub enum VmError {
     #[error("IO error: {source}")]
     IO {
         #[from]
@@ -40,9 +40,9 @@ pub enum InterpError {
     },
 
     #[error("{source}")]
-    VM {
+    Vm {
         #[from]
-        source: VMError,
+        source: VmError,
     },
 
     #[error("IO error: {source}")]

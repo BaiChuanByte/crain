@@ -1,14 +1,23 @@
 use super::*;
 
+/// 8-bits Cell. It is essentially a wrapper around u8.
 pub type Cell8 = u8;
+
+/// 16-bits Cell. It is essentially a wrapper around u16.
 pub type Cell16 = u16;
+
+/// 32-bits Cell. It is essentially a wrapper around u32.
 pub type Cell32 = u32;
+
+/// 64-bits Cell. It is essentially a wrapper around u64.
 pub type Cell64 = u64;
+
+/// 128-bits Cell. It is essentially a wrapper around u128.
 pub type Cell128 = u128;
 
 macro_rules! impl_bfcell {
     ($t:ty) => {
-        impl BFCell for $t {
+        impl BfCell for $t {
             fn zero() -> Self {
                 0
             }
@@ -32,7 +41,7 @@ macro_rules! impl_bfcell {
                 const BYTES_COUNT: usize = (<$t>::BITS / 8) as usize;
                 let mut buf = [0u8; BYTES_COUNT];
 
-                bfinput.read(&mut buf)?;
+                bfinput.read_exact(&mut buf)?;
                 *self = <$t>::from_ne_bytes(buf);
 
                 Ok(())
@@ -41,7 +50,7 @@ macro_rules! impl_bfcell {
             fn output(self, bfoutput: &mut impl std::io::Write) -> Result<(), std::io::Error> {
                 let buf = self.to_ne_bytes();
 
-                bfoutput.write(&buf)?;
+                bfoutput.write_all(&buf)?;
                 bfoutput.flush()?;
 
                 Ok(())

@@ -1,7 +1,43 @@
-mod bfir;
-mod celltype;
+//! Crain -- A brainfuck compiler/interpreter/tool.
+//!
+//!
+//! ```brainfuck
+//!  ++++  +++++    +[   - >    +
+//! +    + +    +  +  >  - ->   +
+//! +      +    < <    < ] > +  +
+//! +      ++++.  [->++> + <  < ]
+//! >    . >   .  <    - - -   --
+//!  ----  .    + +    + + +    .
+//! ```
+//!
+//! Crain is a brainfuck compiler/interpreter/development tool written in Rust,
+//! dedicated to providing a fast, reliable, and ready-to-use execution environment
+//! for brainfuck programs.
+//!
+//! # Features
+//!
+//! - **Fast**: Leveraging Rust's high performance and Crain's optimizations,
+//! Crain can quickly interpret and execute brainfuck programs.
+//!
+//! - **Ready to use**: Crain is designed to allow users to write brainfuck program
+//! with minimal configuration and manual code modifications.
+//!
+//! - **Highly configurable**: Crain offers a wealth of configuration options,
+//! suitable for many brainfuck codes that require special configurations,
+//! and even some brainfuck variants.
+//!
+//! - **Cross-platform support**: Crain can be compiled and run on multiple
+//! operating systems, including Linux, macOS, and Windows.
+//!
+//! > Tip: Some features will be available in future versions.
+
+pub mod bfir;
+pub mod celltype;
+pub mod interp;
+
 mod error;
-mod interp;
+
+pub use error::*;
 
 use clap::*;
 
@@ -35,7 +71,7 @@ enum Commands {
 
 #[derive(Args, Debug)]
 #[group(required = false, multiple = false)]
-pub struct RunMode {
+struct RunMode {
     /// Run the brainfuck file. (default)
     #[clap(long)]
     file: bool,
@@ -45,11 +81,12 @@ pub struct RunMode {
     string: bool,
 }
 
+/// The main func of Crain in effect.
+///
+/// The main func. Most of the logic is command-line argument processing.
 pub fn main_func() {
     let command = Args::parse().command;
-    let err;
-
-    match command {
+    let err = match command {
         Commands::Run {
             mode:
                 RunMode {
@@ -59,9 +96,7 @@ pub fn main_func() {
             file_or_string,
             size,
             ptr,
-        } => {
-            err = interp::run_bf_file(file_or_string, size, ptr);
-        }
+        } => interp::run_bf_file(file_or_string, size, ptr),
 
         Commands::Run {
             mode: RunMode {
@@ -71,12 +106,10 @@ pub fn main_func() {
             file_or_string,
             size,
             ptr,
-        } => {
-            err = interp::run_bf_string(file_or_string, size, ptr);
-        }
+        } => interp::run_bf_string(file_or_string, size, ptr),
 
         Commands::Run { .. } => unreachable!(),
-    }
+    };
 
     if let Err(e) = err {
         println!("{e}");
