@@ -178,7 +178,9 @@ pub fn run_bf_file(name: String, size: usize, ptr: usize) -> Result<(), InterpEr
 
 pub fn run_bf_string(code: String, size: usize, ptr: usize) -> Result<(), InterpError> {
     let mut code = BfFrame::<Cell8>::new(Cursor::new(code))?;
-    let mut vm = BfVm::<Cell8>::new(size, ptr);                                             let mut stdin = std::io::stdin();                                                       let mut stdout = std::io::stdout();
+    let mut vm = BfVm::<Cell8>::new(size, ptr);
+    let mut stdin = std::io::stdin();
+    let mut stdout = std::io::stdout();
 
     vm.run(&mut stdin, &mut stdout, &mut code)?;
 
