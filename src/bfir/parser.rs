@@ -45,10 +45,10 @@ where
                     let mut new_n = n.clone();
                     let last = $vector.last_mut().unwrap();
 
-                    new_n.add(T::one());
+                    new_n.add(T::ONE);
                     *last = $code(new_n);
                 } else {
-                    $vector.push($code(T::one()));
+                    $vector.push($code(T::ONE));
                 }
             };
         }

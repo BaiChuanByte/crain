@@ -5,10 +5,10 @@
 /// This trait defines the atomic operations required for the Brainfuck virtual machine
 /// to interact with the cell.
 pub trait BfCell: Clone + Copy + Eq + PartialEq {
-    /// Returns zero.
-    fn zero() -> Self;
-    /// Returns one.
-    fn one() -> Self;
+    /// Zero of the type.
+    const ZERO: Self;
+    /// One of the type.
+    const ONE: Self;
 
     /// Increases `self` by the given value.
     ///

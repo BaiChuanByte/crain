@@ -18,12 +18,8 @@ pub type Cell128 = u128;
 macro_rules! impl_bfcell {
     ($t:ty) => {
         impl BfCell for $t {
-            fn zero() -> Self {
-                0
-            }
-            fn one() -> Self {
-                1
-            }
+            const ZERO: Self = 0;
+            const ONE: Self = 1;
 
             fn add(&mut self, rhs: Self) {
                 *self = self.wrapping_add(rhs);
@@ -43,7 +39,7 @@ macro_rules! impl_bfcell {
 
                 bfinput.read_exact(&mut buf).or_else(|e| {
                     if e.kind() == std::io::ErrorKind::UnexpectedEof {
-                        *self = <$t>::zero();
+                        *self = <$t>::ZERO;
                         Ok(())
                     } else {
                         Err(e)

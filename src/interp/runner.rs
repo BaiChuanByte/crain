@@ -33,7 +33,7 @@ impl<T: BfCell> BfVm<T> {
             panic!("ValueError: Illegal parameter \"ptr\"")
         }
         BfVm {
-            array: vec![T::zero(); size],
+            array: vec![T::ZERO; size],
             ptr,
         }
     }
