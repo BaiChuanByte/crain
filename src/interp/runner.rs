@@ -100,7 +100,9 @@ impl<T: BfCell> BfVm<T> {
                 }
             }
 
-            Input => cell.input(bfinput).map_err(|e| VmError::IO { source: e })?,
+            Input => cell
+                .input(bfinput)
+                .map_err(|e| VmError::IO { source: e })?,
             Output => cell
                 .output(bfoutput)
                 .map_err(|e| VmError::IO { source: e })?,

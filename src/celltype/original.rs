@@ -41,7 +41,15 @@ macro_rules! impl_bfcell {
                 const BYTES_COUNT: usize = (<$t>::BITS / 8) as usize;
                 let mut buf = [0u8; BYTES_COUNT];
 
-                bfinput.read_exact(&mut buf)?;
+                bfinput.read_exact(&mut buf).or_else(|e| {
+                    if e.kind() == std::io::ErrorKind::UnexpectedEof {
+                        *self = <$t>::zero();
+                        Ok(())
+                    } else {
+                        Err(e)
+                    }
+                })?;
+
                 *self = <$t>::from_ne_bytes(buf);
 
                 Ok(())
