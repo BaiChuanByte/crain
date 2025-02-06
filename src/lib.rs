@@ -40,6 +40,7 @@ mod error;
 pub use error::*;
 
 use clap::*;
+use std::process::ExitCode;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -84,7 +85,7 @@ struct RunMode {
 /// The main func of Crain in effect.
 ///
 /// The main func. Most of the logic is command-line argument processing.
-pub fn main_func() {
+pub fn main_func() -> ExitCode {
     let command = Args::parse().command;
     let err = match command {
         Commands::Run {
@@ -112,7 +113,9 @@ pub fn main_func() {
     };
 
     if let Err(e) = err {
-        println!("{e}");
-        std::process::exit(1);
+        eprintln!("{e}");
+        ExitCode::FAILURE
+    } else {
+        ExitCode::SUCCESS
     }
 }
