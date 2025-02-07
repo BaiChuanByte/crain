@@ -45,7 +45,7 @@ impl<T: BfCell> BfVm<T> {
     /// # Failures
     /// The function will return a `VmError` if:
     /// 1. An error occurs during an IO operation.
-    /// 2. The pointer goes out of the array bounds.
+    /// 2. An operation not allowed by BfVm is performed.
     ///
     /// # Examples
     /// ```rust
@@ -131,7 +131,7 @@ impl<T: BfCell> BfVm<T> {
     /// # Failures
     /// The function will return a `VmError` if:
     /// 1. An error occurs during an IO operation.
-    /// 2. The pointer goes out of the array bounds.
+    /// 2. An operation not allowed by BfVm is performed.
     ///
     /// # Examples
     /// ```rust
@@ -166,7 +166,21 @@ impl<T: BfCell> BfVm<T> {
     }
 }
 
-pub fn run_bf_file(name: String, size: usize, ptr: usize) -> Result<(), InterpError> {
+/// Eval a brainfuck code file.
+///
+/// Open a file by name and eval it.
+///
+/// # Failures
+/// The function will return a `VmError` if:
+/// 1. An error occurs during an IO operation.
+/// 2. A syntax error in the brainfuck code (such as mismatched brackets).
+/// 3. An operation not allowed by BfVm is performed.
+///
+/// # Example
+/// ```rust, no_run
+/// crain::interp::eval_file("your_file_name.bf", 30000, 0);
+/// ```
+pub fn eval_file(name: String, size: usize, ptr: usize) -> Result<(), InterpError> {
     let f = File::open(name)?;
     let mut code = BfFrame::<Cell8>::new(BufReader::new(f))?;
     let mut vm = BfVm::<Cell8>::new(size, ptr);
@@ -178,7 +192,22 @@ pub fn run_bf_file(name: String, size: usize, ptr: usize) -> Result<(), InterpEr
     Ok(())
 }
 
-pub fn run_bf_string(code: String, size: usize, ptr: usize) -> Result<(), InterpError> {
+/// Eval a brainfuck code string.
+///
+/// Get a string and eval it.
+///
+/// # Failures
+/// The function will return a `VmError` if:
+/// 1. An error occurs during an IO operation.
+/// 2. A syntax error in the brainfuck code (such as mismatched brackets).
+/// 3. An operation not allowed by BfVm is performed.
+///
+/// # Example
+/// ```rust
+/// // print "A"
+/// crain::interp::eval_string("\"+++++++++++++[->+++++<]>.bf\"", 30000, 0);
+/// ```
+pub fn eval_string(code: String, size: usize, ptr: usize) -> Result<(), InterpError> {
     let mut code = BfFrame::<Cell8>::new(Cursor::new(code))?;
     let mut vm = BfVm::<Cell8>::new(size, ptr);
     let mut stdin = std::io::stdin();

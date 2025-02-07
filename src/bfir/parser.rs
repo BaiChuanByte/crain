@@ -14,7 +14,7 @@ where
     ///
     /// The function will return a `ParseError` if:
     /// 1. An error occurs during an IO operation.
-    /// 2. The left and right brackets do not match.
+    /// 2. A syntax error in the brainfuck code (such as mismatched brackets).
     ///
     /// # Examples
     /// ```rust

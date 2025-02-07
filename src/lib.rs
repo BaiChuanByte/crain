@@ -97,7 +97,7 @@ pub fn main_func() -> ExitCode {
             file_or_string,
             size,
             ptr,
-        } => interp::run_bf_file(file_or_string, size, ptr),
+        } => interp::eval_file(file_or_string, size, ptr),
 
         Commands::Run {
             mode: RunMode {
@@ -107,7 +107,7 @@ pub fn main_func() -> ExitCode {
             file_or_string,
             size,
             ptr,
-        } => interp::run_bf_string(file_or_string, size, ptr),
+        } => interp::eval_string(file_or_string, size, ptr),
 
         Commands::Run { .. } => unreachable!(),
     };
