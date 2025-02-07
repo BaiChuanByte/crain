@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::{BufReader, Cursor};
 
 use super::*;
-use crate::bfir::BfCode::*;
+use crate::bfic::BfCode::*;
 use crate::celltype::*;
 use crate::error::{InterpError, VmError};
 

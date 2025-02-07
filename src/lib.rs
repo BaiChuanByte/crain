@@ -31,13 +31,13 @@
 //!
 //! > Tip: Some features will be available in future versions.
 
-pub mod bfir;
+pub mod bfic;
 pub mod celltype;
 pub mod interp;
 
 mod error;
 
-pub use bfir::BfCode;
+pub use bfic::BfCode;
 pub use celltype::*;
 pub use interp::{BfFrame, BfVm};
 pub use interp::{eval_file, eval_string};

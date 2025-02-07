@@ -1,4 +1,4 @@
-use crate::bfir::BfCode;
+use crate::bfic::BfCode;
 use crate::celltype::BfCell;
 use crate::error::*;
 
