@@ -61,8 +61,8 @@ impl<T: BfCell> BfVm<T> {
     /// let mut input = Cursor::new("".as_bytes().to_vec());
     /// let mut output = Cursor::new("".as_bytes().to_vec());
     ///
-    /// vm.run(&mut input, &mut output, &mut frame)?;
-    /// vm.run(&mut input, &mut output, &mut frame)?;
+    /// vm.simple_step(&mut input, &mut output, &mut frame)?;
+    /// vm.simple_step(&mut input, &mut output, &mut frame)?;
     ///
     /// assert_eq!(*output.get_ref(), "\x01".as_bytes().to_vec());
     /// # Ok::<(), crain::InterpError>(())
