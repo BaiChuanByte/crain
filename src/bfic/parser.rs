@@ -127,7 +127,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::bfir::BfCode::*;
+    use crate::bfic::BfCode::*;
     use crate::celltype::Cell8;
     use std::io::BufReader;
 
