@@ -13,23 +13,6 @@
 //! Crain is a brainfuck compiler/interpreter/development tool written in Rust,
 //! dedicated to providing a fast, reliable, and ready-to-use execution environment
 //! for brainfuck programs.
-//!
-//! # Features
-//!
-//! - **Fast**: Leveraging Rust's high performance and Crain's optimizations,
-//! Crain can quickly interpret and execute brainfuck programs.
-//!
-//! - **Ready to use**: Crain is designed to allow users to write brainfuck program
-//! with minimal configuration and manual code modifications.
-//!
-//! - **Highly configurable**: Crain offers a wealth of configuration options,
-//! suitable for many brainfuck codes that require special configurations,
-//! and even some brainfuck variants.
-//!
-//! - **Cross-platform support**: Crain can be compiled and run on multiple
-//! operating systems, including Linux, macOS, and Windows.
-//!
-//! > Tip: Some features will be available in future versions.
 
 pub mod bfic;
 pub mod celltype;
