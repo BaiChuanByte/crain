@@ -22,11 +22,10 @@ mod error;
 
 pub use bfic::BfCode;
 pub use celltype::*;
-pub use interp::{BfFrame, BfVm};
 pub use interp::{eval_file, eval_string};
+pub use interp::{BfFrame, BfVm};
 
 pub use error::*;
-
 
 use clap::*;
 use std::process::ExitCode;
