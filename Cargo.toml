@@ -29,4 +29,5 @@ exclude = [
 
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }
+smart-default = "0.7.1"
 thiserror = "1.0"

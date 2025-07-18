@@ -3,6 +3,7 @@ use std::io::{BufReader, Cursor};
 
 use super::*;
 use crate::bfic::BfCode::*;
+use crate::bfsetting::BfSetting;
 use crate::celltype::*;
 use crate::error::{InterpError, VmError};
 
@@ -13,6 +14,7 @@ use crate::error::{InterpError, VmError};
 pub struct BfVm<T: BfCell> {
     array: Vec<T>,
     ptr: usize,
+    setting: BfSetting,
 }
 
 impl<T: BfCell> BfVm<T> {
@@ -25,16 +27,17 @@ impl<T: BfCell> BfVm<T> {
     /// ```rust
     /// crain::interp::BfVm::<crain::celltype::Cell8>::new(30000, 0);
     /// ```
-    pub fn new(size: usize, ptr: usize) -> Self {
-        if size == 0 {
+    pub fn new(setting: BfSetting) -> Self {
+        if setting.size == 0 {
             panic!("ValueError: Illegal parameter \"size\"")
         }
-        if ptr >= size {
+        if setting.ptr >= setting.size {
             panic!("ValueError: Illegal parameter \"ptr\"")
         }
         BfVm {
-            array: vec![T::ZERO; size],
-            ptr,
+            array: vec![T::ZERO; setting.size],
+            ptr: setting.ptr,
+            setting,
         }
     }
 
@@ -69,7 +72,7 @@ impl<T: BfCell> BfVm<T> {
     /// ```
     pub fn simple_step(
         &mut self,
-        bfinput: &mut impl std::io::Read,
+        bfinput: &mut impl std::io::BufRead,
         bfoutput: &mut impl std::io::Write,
         frame: &mut BfFrame<T>,
     ) -> Result<(), VmError> {
@@ -100,9 +103,9 @@ impl<T: BfCell> BfVm<T> {
                 }
             }
 
-            Input => cell.input(bfinput).map_err(|e| VmError::IO { source: e })?,
+            Input => cell.input(bfinput, &self.setting).map_err(|e| VmError::IO { source: e })?,
             Output => cell
-                .output(bfoutput)
+                .output(bfoutput, &self.setting)
                 .map_err(|e| VmError::IO { source: e })?,
 
             Jz(n) => {
@@ -152,7 +155,7 @@ impl<T: BfCell> BfVm<T> {
     /// ```
     pub fn run(
         &mut self,
-        bfinput: &mut impl std::io::Read,
+        bfinput: &mut impl std::io::BufRead,
         bfoutput: &mut impl std::io::Write,
         frame: &mut BfFrame<T>,
     ) -> Result<(), VmError> {
@@ -178,11 +181,11 @@ impl<T: BfCell> BfVm<T> {
 /// ```rust, no_run
 /// crain::interp::eval_file("your_file_name.bf".to_string(), 30000, 0);
 /// ```
-pub fn eval_file(name: String, size: usize, ptr: usize) -> Result<(), InterpError> {
+pub fn eval_file(name: String, setting: BfSetting) -> Result<(), InterpError> {
     let f = File::open(name)?;
     let mut code = BfFrame::<Cell8>::new(BufReader::new(f))?;
-    let mut vm = BfVm::<Cell8>::new(size, ptr);
-    let mut stdin = std::io::stdin();
+    let mut vm = BfVm::<Cell8>::new(setting);
+    let mut stdin = BufReader::new(std::io::stdin());
     let mut stdout = std::io::stdout();
 
     vm.run(&mut stdin, &mut stdout, &mut code)?;
@@ -205,10 +208,10 @@ pub fn eval_file(name: String, size: usize, ptr: usize) -> Result<(), InterpErro
 /// // print "A"
 /// crain::interp::eval_string("\"+++++++++++++[->+++++<]>.bf\"".to_string(), 30000, 0);
 /// ```
-pub fn eval_string(code: String, size: usize, ptr: usize) -> Result<(), InterpError> {
+pub fn eval_string(code: String, setting: BfSetting) -> Result<(), InterpError> {
     let mut code = BfFrame::<Cell8>::new(Cursor::new(code))?;
-    let mut vm = BfVm::<Cell8>::new(size, ptr);
-    let mut stdin = std::io::stdin();
+    let mut vm = BfVm::<Cell8>::new(setting);
+    let mut stdin = BufReader::new(std::io::stdin());
     let mut stdout = std::io::stdout();
 
     vm.run(&mut stdin, &mut stdout, &mut code)?;
@@ -223,7 +226,11 @@ mod tests {
 
     #[test]
     fn test_runner() {
-        let mut vm = BfVm::<Cell8>::new(10, 0);
+        let mut vm = BfVm::<Cell8>::new(BfSetting {
+            size: 30000,
+            ptr: 0,
+            ..Default::default()
+        });
         let mut input = Cursor::new(Vec::<u8>::new());
         let mut output = Cursor::new(Vec::<u8>::new());
 

@@ -15,12 +15,14 @@
 //! for brainfuck programs.
 
 pub mod bfic;
+pub mod bfsetting;
 pub mod celltype;
 pub mod interp;
 
 mod error;
 
 pub use bfic::BfCode;
+pub use bfsetting::BfSetting;
 pub use celltype::*;
 pub use interp::{BfFrame, BfVm};
 pub use interp::{eval_file, eval_string};
@@ -48,13 +50,9 @@ enum Commands {
         #[clap(required(true))]
         file_or_string: String,
 
-        /// The size of array.
-        #[clap(short, long, default_value_t = 30000)]
-        size: usize,
-
-        /// The position of ptr (start from 0).
-        #[clap(short, long, default_value_t = 0)]
-        ptr: usize,
+        /// The setting about the interpreter.
+        #[clap(flatten)]
+        setting: Setting,
     },
 }
 
@@ -70,6 +68,29 @@ struct RunMode {
     string: bool,
 }
 
+#[derive(Args, Debug)]
+struct Setting {
+    /// The size of the memory array.
+    #[clap(long, default_value = "30000")]
+    size: usize,
+
+    /// The initial pointer position.
+    #[clap(long, default_value = "0")]
+    ptr: usize,
+
+    /// The value to if translate "\r\n" to "\n" (0x0A).
+    #[clap(long, default_value = "true")]
+    translate_newline: bool,
+
+    /// The value to set what EOF is converted to.
+    #[clap(long, default_value = "zero")]
+    eof_value: String,
+
+    /// The value to set which endian interprets the cell as character(s).
+    #[clap(long, default_value = "little")]
+    endian: String,
+}
+
 /// The main func of Crain in effect.
 ///
 /// The main func. Most of the logic is command-line argument processing.
@@ -83,9 +104,30 @@ pub fn main_func() -> ExitCode {
                     string: false,
                 },
             file_or_string,
+            setting: Setting {
+                    size,
+                    ptr,
+                    translate_newline,
+                    eof_value,
+                    endian,
+                },
+        } => interp::eval_file(file_or_string, BfSetting {
             size,
             ptr,
-        } => interp::eval_file(file_or_string, size, ptr),
+            translate_newline,
+            eof_value: match eof_value.as_str() {
+                "zero" => bfsetting::EofValue::Zero,
+                "negative_one" => bfsetting::EofValue::NegativeOne,
+                "no_write" => bfsetting::EofValue::NoWrite,
+                _ => panic!("Invalid EOF value: {}", eof_value),
+            }
+            , endian: match endian.as_str() {
+                "little" => bfsetting::Endian::Little,
+                "big" => bfsetting::Endian::Big,
+                "native" => bfsetting::Endian::Native,
+                _ => panic!("Invalid Endian value: {}", endian),
+            },
+        }),
 
         Commands::Run {
             mode: RunMode {
@@ -93,9 +135,30 @@ pub fn main_func() -> ExitCode {
                 string: true,
             },
             file_or_string,
+            setting: Setting {
+                size,
+                ptr,
+                translate_newline,
+                eof_value,
+                endian,
+            },
+        } => interp::eval_string(file_or_string, BfSetting {
             size,
             ptr,
-        } => interp::eval_string(file_or_string, size, ptr),
+            translate_newline,
+            eof_value: match eof_value.as_str() {
+                "zero" => bfsetting::EofValue::Zero,
+                "negative_one" => bfsetting::EofValue::NegativeOne,
+                "no_write" => bfsetting::EofValue::NoWrite,
+                _ => panic!("Invalid EOF value: {}", eof_value),
+            },
+            endian: match endian.as_str() {
+                "little" => bfsetting::Endian::Little,
+                "big" => bfsetting::Endian::Big,
+                "native" => bfsetting::Endian::Native,
+                _ => panic!("Invalid Endian value: {}", endian),
+            },
+        }),
 
         Commands::Run { .. } => unreachable!(),
     };

@@ -1,3 +1,5 @@
+use crate::bfsetting::*;
+
 use super::*;
 
 /// 8-bits Cell. It is essentially a wrapper around u8.
@@ -20,6 +22,7 @@ macro_rules! impl_bfcell {
         impl BfCell for $t {
             const ZERO: Self = 0;
             const ONE: Self = 1;
+            const BITS: u32 = 8 * (std::mem::size_of::<Self>() as u32);
 
             fn add(&mut self, rhs: Self) {
                 *self = self.wrapping_add(rhs);
@@ -32,29 +35,81 @@ macro_rules! impl_bfcell {
                 self == 0
             }
 
-            fn input(&mut self, bfinput: &mut impl std::io::Read) -> Result<(), std::io::Error> {
-                // compiler cannot know it
-                const BYTES_COUNT: usize = (<$t>::BITS / 8) as usize;
-                let mut buf = [0u8; BYTES_COUNT];
+            fn input(&mut self, bfinput: &mut impl std::io::BufRead, setting: &BfSetting) -> Result<(), std::io::Error> {
+                let mut bytes = [0u8];
+                let mut no_write = false;
+                let peeked;
 
-                bfinput.read_exact(&mut buf).or_else(|e| {
+                bfinput.read_exact(&mut bytes).or_else(|e| {
                     if e.kind() == std::io::ErrorKind::UnexpectedEof {
-                        *self = <$t>::ZERO;
+                        match setting.eof_value {
+                            EofValue::Zero => bytes[0] = 0,
+                            EofValue::NegativeOne => bytes[0] = 0xFF,
+                            EofValue::NoWrite => no_write = true,
+                        }
                         Ok(())
                     } else {
                         Err(e)
                     }
                 })?;
+                if no_write {
+                    return Ok(());
+                }
+                let mut byte = bytes[0];
 
-                *self = <$t>::from_ne_bytes(buf);
+                if setting.translate_newline {
+                    if byte == b'\r' {
+                        peeked = bfinput.fill_buf().map_or_else(|e| {
+                            if e.kind() == std::io::ErrorKind::UnexpectedEof {
+                                Ok(None)
+                            } else {
+                                Err(e)
+                            }
+                        }, |buf| {
+                            if buf.is_empty() {
+                                Ok(None)
+                            } else {
+                                Ok(Some(buf[0]))
+                            }
+                        })?;
 
+                        if let Some(peeked) = peeked {
+                            byte = peeked;
+                            bfinput.consume(1); // Consume the '\n' byte what we peeked.
+                        }
+                    }
+                }
+
+                *self = byte.into();
                 Ok(())
             }
 
-            fn output(self, bfoutput: &mut impl std::io::Write) -> Result<(), std::io::Error> {
-                let buf = self.to_ne_bytes();
+            fn output(self, bfoutput: &mut impl std::io::Write, setting: &BfSetting) -> Result<(), std::io::Error> {
+                let buf = match setting.endian {
+                    Endian::Little => self.to_le_bytes(),
+                    Endian::Big => self.to_be_bytes(),
+                    Endian::Native => self.to_ne_bytes(),
+                }.to_vec();
+                let size = buf.len();
 
-                bfoutput.write_all(&buf)?;
+                let mut translate_buf = Vec::with_capacity(size);
+
+                if setting.translate_newline {
+                    let mut i = 0;
+                    while i < size {
+                        let byte = &buf[i];
+                        if *byte == b'\n' {
+                            translate_buf.push(b'\r');
+                            translate_buf.push(b'\n');
+                            i += 2;
+                        } else {
+                            translate_buf.push(*byte);
+                            i += 1;
+                        }
+                    }
+                }
+
+                bfoutput.write_all(&translate_buf)?;
                 bfoutput.flush()?;
 
                 Ok(())
