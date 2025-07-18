@@ -176,7 +176,7 @@ impl<T: BfCell> BfVm<T> {
 ///
 /// # Example
 /// ```rust, no_run
-/// crain::interp::eval_file("your_file_name.bf", 30000, 0);
+/// crain::interp::eval_file("your_file_name.bf".to_string(), 30000, 0);
 /// ```
 pub fn eval_file(name: String, size: usize, ptr: usize) -> Result<(), InterpError> {
     let f = File::open(name)?;
@@ -203,7 +203,7 @@ pub fn eval_file(name: String, size: usize, ptr: usize) -> Result<(), InterpErro
 /// # Example
 /// ```rust
 /// // print "A"
-/// crain::interp::eval_string("\"+++++++++++++[->+++++<]>.bf\"", 30000, 0);
+/// crain::interp::eval_string("\"+++++++++++++[->+++++<]>.bf\"".to_string(), 30000, 0);
 /// ```
 pub fn eval_string(code: String, size: usize, ptr: usize) -> Result<(), InterpError> {
     let mut code = BfFrame::<Cell8>::new(Cursor::new(code))?;

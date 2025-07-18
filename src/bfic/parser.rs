@@ -19,7 +19,7 @@ where
     /// # Examples
     /// ```rust
     /// use std::io::BufReader;
-    /// use crain::bfir::BfCode::{self, *};
+    /// use crain::bfic::BfCode::{self, *};
     /// use crain::celltype::Cell8;
     ///
     /// let code = BufReader::new("+-<>,.[]".as_bytes());
