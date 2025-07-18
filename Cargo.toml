@@ -1,7 +1,7 @@
 [package]
 name = "crain"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 authors = ["BaiChuanByte <baichuanbyte@outlook.com>"]
 
 description = "A Brainfuck compiler/interpreter/tool"

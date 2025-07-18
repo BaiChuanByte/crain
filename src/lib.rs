@@ -22,8 +22,8 @@ mod error;
 
 pub use bfic::BfCode;
 pub use celltype::*;
-pub use interp::{eval_file, eval_string};
 pub use interp::{BfFrame, BfVm};
+pub use interp::{eval_file, eval_string};
 
 pub use error::*;
 
