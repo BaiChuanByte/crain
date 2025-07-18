@@ -15,17 +15,7 @@ categories = ["compilers", "parser-implementations"]
 
 license = "MIT"
 
-exclude = [
-    "CHANGELOG.md",
-    "Cargo.lock",
-    "LICENSE",
-    "LICENSE-WTFPL",
-    "NOTICE",
-    "README.md",
-    "example",
-    "rustfmt.toml",
-    "target",
-]
+include = ["Cargo.lock", "Cargo.toml", "README.md", "src/**/*"]
 
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }
