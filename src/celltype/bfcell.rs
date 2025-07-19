@@ -35,7 +35,11 @@ pub trait BfCell: Clone + Copy + ToString + From<u8> + Eq + PartialEq {
     ///
     /// # Failures
     /// A `std::io::Error` will be returned if it occurs during the reading process.
-    fn input(&mut self, bfinput: &mut impl BufRead, setting: &BfSetting) -> Result<(), std::io::Error>;
+    fn input(
+        &mut self,
+        bfinput: &mut impl BufRead,
+        setting: &BfSetting,
+    ) -> Result<(), std::io::Error>;
     /// Writes `self` to the output stream.
     ///
     /// # Failures

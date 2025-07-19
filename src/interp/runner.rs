@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{BufReader, Cursor};
+use std::path::PathBuf;
 
 use super::*;
 use crate::bfic::BfCode::*;
@@ -107,7 +108,9 @@ impl<T: BfCell> BfVm<T> {
                 }
             }
 
-            Input => cell.input(bfinput, &self.setting).map_err(|e| VmError::IO { source: e })?,
+            Input => cell
+                .input(bfinput, &self.setting)
+                .map_err(|e| VmError::IO { source: e })?,
             Output => cell
                 .output(bfoutput, &self.setting)
                 .map_err(|e| VmError::IO { source: e })?,
@@ -187,9 +190,9 @@ impl<T: BfCell> BfVm<T> {
 ///
 /// # Example
 /// ```rust, no_run
-/// crain::interp::eval_file("your_file_name.bf".to_string(), crain::BfSetting::default());
+/// crain::interp::eval_file(&"your_file_name.bf".to_string().into(), Default::default());
 /// ```
-pub fn eval_file(name: String, setting: BfSetting) -> Result<(), InterpError> {
+pub fn eval_file(name: &PathBuf, setting: BfSetting) -> Result<(), InterpError> {
     let f = File::open(name)?;
     let mut code = BfFrame::<Cell8>::new(BufReader::new(f))?;
     let mut vm = BfVm::<Cell8>::new(setting);
@@ -214,9 +217,9 @@ pub fn eval_file(name: String, setting: BfSetting) -> Result<(), InterpError> {
 /// # Example
 /// ```rust
 /// // print "A"
-/// crain::interp::eval_string("\"+++++++++++++[->+++++<]>.bf\"".to_string(), crain::BfSetting::default());
+/// crain::interp::eval_string("\"+++++++++++++[->+++++<]>.bf\"", Default::default());
 /// ```
-pub fn eval_string(code: String, setting: BfSetting) -> Result<(), InterpError> {
+pub fn eval_string(code: &str, setting: BfSetting) -> Result<(), InterpError> {
     let mut code = BfFrame::<Cell8>::new(Cursor::new(code))?;
     let mut vm = BfVm::<Cell8>::new(setting);
     let mut stdin = BufReader::new(std::io::stdin());
@@ -262,6 +265,6 @@ mod tests {
         vm.run(&mut input, &mut output, &mut frame)
             .map_or_else(|e| panic!("Vm Error: {e}"), |v| v);
 
-        assert_eq!(*output.get_ref(), Vec::<Cell8>::from("Crain"));
+        assert_eq!(*output.get_ref(), Vec::<u8>::from("Crain"));
     }
 }

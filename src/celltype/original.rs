@@ -2,19 +2,19 @@ use crate::bfsetting::*;
 
 use super::*;
 
-/// 8-bits Cell. It is essentially a wrapper around u8.
+/// 8-bit Cell. It is essentially a wrapper around u8.
 pub type Cell8 = u8;
 
-/// 16-bits Cell. It is essentially a wrapper around u16.
+/// 16-bit Cell. It is essentially a wrapper around u16.
 pub type Cell16 = u16;
 
-/// 32-bits Cell. It is essentially a wrapper around u32.
+/// 32-bit Cell. It is essentially a wrapper around u32.
 pub type Cell32 = u32;
 
-/// 64-bits Cell. It is essentially a wrapper around u64.
+/// 64-bit Cell. It is essentially a wrapper around u64.
 pub type Cell64 = u64;
 
-/// 128-bits Cell. It is essentially a wrapper around u128.
+/// 128-bit Cell. It is essentially a wrapper around u128.
 pub type Cell128 = u128;
 
 macro_rules! impl_bfcell {
@@ -35,7 +35,11 @@ macro_rules! impl_bfcell {
                 self == 0
             }
 
-            fn input(&mut self, bfinput: &mut impl std::io::BufRead, setting: &BfSetting) -> Result<(), std::io::Error> {
+            fn input(
+                &mut self,
+                bfinput: &mut impl std::io::BufRead,
+                setting: &BfSetting,
+            ) -> Result<(), std::io::Error> {
                 let mut bytes = [0u8];
                 let mut no_write = false;
                 let peeked;
@@ -59,19 +63,22 @@ macro_rules! impl_bfcell {
 
                 if setting.translate_newline {
                     if byte == b'\r' {
-                        peeked = bfinput.fill_buf().map_or_else(|e| {
-                            if e.kind() == std::io::ErrorKind::UnexpectedEof {
-                                Ok(None)
-                            } else {
-                                Err(e)
-                            }
-                        }, |buf| {
-                            if buf.is_empty() {
-                                Ok(None)
-                            } else {
-                                Ok(Some(buf[0]))
-                            }
-                        })?;
+                        peeked = bfinput.fill_buf().map_or_else(
+                            |e| {
+                                if e.kind() == std::io::ErrorKind::UnexpectedEof {
+                                    Ok(None)
+                                } else {
+                                    Err(e)
+                                }
+                            },
+                            |buf| {
+                                if buf.is_empty() {
+                                    Ok(None)
+                                } else {
+                                    Ok(Some(buf[0]))
+                                }
+                            },
+                        )?;
 
                         if let Some(peeked) = peeked {
                             byte = peeked;
@@ -84,7 +91,11 @@ macro_rules! impl_bfcell {
                 Ok(())
             }
 
-            fn output(self, bfoutput: &mut impl std::io::Write, setting: &BfSetting) -> Result<(), std::io::Error> {
+            fn output(
+                self,
+                bfoutput: &mut impl std::io::Write,
+                setting: &BfSetting,
+            ) -> Result<(), std::io::Error> {
                 let buf = match setting.endian {
                     Endian::Little => self.to_le_bytes(),
                     Endian::Big => self.to_be_bytes(),
