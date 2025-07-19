@@ -7,7 +7,7 @@ authors = ["BaiChuanByte <baichuanbyte@outlook.com>"]
 description = "A Brainfuck compiler/interpreter/tool"
 
 documentation = "https://docs.rs/crain"
-repository = "https://crates.io/crates/crain"
+repository = "https://github.com/BaichuanByte/crain"
 readme = "README.md"
 
 keywords = ["brainfuck", "esolang", "compiler", "interpreter"]

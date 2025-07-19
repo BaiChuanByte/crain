@@ -2,8 +2,10 @@
 
 Crain -- A brainfuck compiler/interpreter/tool.
 
+[![GitHub](https://img.shields.io/badge/Github-Crain-red)](https://github.com/BaiChuanByte/Crain)
 [![Crates.io](https://img.shields.io/crates/v/crain.svg)](https://crates.io/crates/crain)
-[![Documentation](https://img.shields.io/badge/docs-rustdoc-blue.svg)](https://docs.rs/crain)
+[![Documentation](https://img.shields.io/badge/docs-rustdoc-green.svg)](https://docs.rs/crain)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/license/mit/)
 
 ```brainfuck
  ++++  +++++    +[   - >    +
