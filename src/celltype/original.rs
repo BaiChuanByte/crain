@@ -89,13 +89,13 @@ macro_rules! impl_bfcell {
                     Endian::Little => self.to_le_bytes(),
                     Endian::Big => self.to_be_bytes(),
                     Endian::Native => self.to_ne_bytes(),
-                }.to_vec();
-                let size = buf.len();
-
-                let mut translate_buf = Vec::with_capacity(size);
+                };
 
                 if setting.translate_newline {
                     let mut i = 0;
+                    let size = buf.len();
+                    let mut translate_buf = Vec::with_capacity(size);
+
                     while i < size {
                         let byte = &buf[i];
                         if *byte == b'\n' {
@@ -107,9 +107,11 @@ macro_rules! impl_bfcell {
                             i += 1;
                         }
                     }
+                    bfoutput.write_all(translate_buf.as_ref())?;
+                } else {
+                    bfoutput.write_all(&buf)?
                 }
 
-                bfoutput.write_all(&translate_buf)?;
                 bfoutput.flush()?;
 
                 Ok(())

@@ -25,7 +25,7 @@ impl<T: BfCell> BfVm<T> {
     ///
     /// # Examples
     /// ```rust
-    /// crain::interp::BfVm::<crain::celltype::Cell8>::new(30000, 0);
+    /// crain::interp::BfVm::<crain::celltype::Cell8>::new(crain::BfSetting::default());
     /// ```
     pub fn new(setting: BfSetting) -> Self {
         if setting.size == 0 {
@@ -53,13 +53,17 @@ impl<T: BfCell> BfVm<T> {
     /// # Examples
     /// ```rust
     /// use std::io::Cursor;
+    /// use crain::BfSetting;
     /// use crain::celltype::Cell8;
     /// use crain::interp::{BfFrame, BfVm};
     ///
     /// let mut frame = BfFrame::<Cell8>::new(Cursor::new(
     ///     "+.".as_bytes().to_vec()
     /// ))?;
-    /// let mut vm = BfVm::new(1, 0);
+    /// let mut vm = BfVm::new(BfSetting{
+    ///     size: 1,
+    ///     ..Default::default()
+    /// });
     ///
     /// let mut input = Cursor::new("".as_bytes().to_vec());
     /// let mut output = Cursor::new("".as_bytes().to_vec());
@@ -137,13 +141,17 @@ impl<T: BfCell> BfVm<T> {
     /// # Examples
     /// ```rust
     /// use std::io::Cursor;
+    /// use crain::BfSetting;
     /// use crain::celltype::Cell8;
     /// use crain::interp::{BfFrame, BfVm};
     ///
     /// let mut frame = BfFrame::<Cell8>::new(Cursor::new(
     ///     "+++++++++++++[->+++++<]>.".as_bytes().to_vec()
     /// ))?;
-    /// let mut vm = BfVm::new(2, 0);
+    /// let mut vm = BfVm::new(BfSetting{
+    ///     size: 2,
+    ///     ..Default::default()
+    /// });
     ///
     /// let mut input = Cursor::new("".as_bytes().to_vec());
     /// let mut output = Cursor::new("".as_bytes().to_vec());
@@ -179,7 +187,7 @@ impl<T: BfCell> BfVm<T> {
 ///
 /// # Example
 /// ```rust, no_run
-/// crain::interp::eval_file("your_file_name.bf".to_string(), 30000, 0);
+/// crain::interp::eval_file("your_file_name.bf".to_string(), crain::BfSetting::default());
 /// ```
 pub fn eval_file(name: String, setting: BfSetting) -> Result<(), InterpError> {
     let f = File::open(name)?;
@@ -206,7 +214,7 @@ pub fn eval_file(name: String, setting: BfSetting) -> Result<(), InterpError> {
 /// # Example
 /// ```rust
 /// // print "A"
-/// crain::interp::eval_string("\"+++++++++++++[->+++++<]>.bf\"".to_string(), 30000, 0);
+/// crain::interp::eval_string("\"+++++++++++++[->+++++<]>.bf\"".to_string(), crain::BfSetting::default());
 /// ```
 pub fn eval_string(code: String, setting: BfSetting) -> Result<(), InterpError> {
     let mut code = BfFrame::<Cell8>::new(Cursor::new(code))?;
@@ -227,14 +235,14 @@ mod tests {
     #[test]
     fn test_runner() {
         let mut vm = BfVm::<Cell8>::new(BfSetting {
-            size: 30000,
+            size: 4,
             ptr: 0,
             ..Default::default()
         });
         let mut input = Cursor::new(Vec::<u8>::new());
         let mut output = Cursor::new(Vec::<u8>::new());
 
-        let error_func = |e| panic!("Parse Error: {e}");
+        let error_func = |e| panic!("Error: {e}");
         let ok_func = |v| v;
         let new_frame = |s: &str| {
             BfFrame::<Cell8>::new(BufReader::new(s.as_bytes())).map_or_else(error_func, ok_func)
