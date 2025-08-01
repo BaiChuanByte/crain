@@ -18,6 +18,6 @@ license = "MIT"
 include = ["Cargo.lock", "Cargo.toml", "README.md", "src/**/*"]
 
 [dependencies]
-clap = { version = "4.5", features = ["cargo"] }
-smart-default = "0.7.1"
+clap = { version = "4.5", features = ["derive"] }
+smart-default = "0.7"
 thiserror = "2.0"

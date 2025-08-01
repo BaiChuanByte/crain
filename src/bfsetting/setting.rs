@@ -1,6 +1,8 @@
+use clap::ValueEnum;
+
 use smart_default::SmartDefault;
 
-#[derive(Debug, Eq, PartialEq, SmartDefault)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, SmartDefault)]
 pub struct BfSetting {
     /// The size of the memory array.
     #[default = 30000]
@@ -23,7 +25,7 @@ pub struct BfSetting {
     pub endian: Endian,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, ValueEnum)]
 pub enum EofValue {
     /// Convert EOF to 0.
     Zero,
@@ -33,7 +35,7 @@ pub enum EofValue {
     NoWrite,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, ValueEnum)]
 pub enum Endian {
     /// Little-endian, where the least significant byte is stored first.
     Little,
