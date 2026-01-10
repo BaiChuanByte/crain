@@ -17,110 +17,12 @@
 pub mod bfic;
 pub mod bfsetting;
 pub mod celltype;
+pub mod error;
 pub mod interp;
-
-mod error;
 
 pub use bfic::BfCode;
 pub use bfsetting::{BfSetting, Endian, EofValue};
 pub use celltype::*;
+pub use error::*;
 pub use interp::{BfFrame, BfVm};
 pub use interp::{eval_file, eval_string};
-
-pub use error::*;
-
-use clap::*;
-use std::path::PathBuf;
-use std::process::ExitCode;
-
-#[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
-struct Args {
-    #[clap(subcommand)]
-    command: Commands,
-}
-
-#[derive(Subcommand, Debug)]
-enum Commands {
-    /// Run the brainfuck code.
-    Run {
-        #[clap(flatten)]
-        mode: RunMode,
-
-        /// The setting about the interpreter.
-        #[clap(flatten)]
-        setting: BfSettingArgs,
-    },
-}
-
-#[derive(Args, Debug)]
-#[group(required = true, multiple = false)]
-struct RunMode {
-    /// Run the brainfuck file. (default)
-    file: Option<PathBuf>,
-
-    /// Run the brainfuck string.
-    #[clap(long)]
-    string: Option<String>,
-}
-
-#[derive(Args, Debug)]
-struct BfSettingArgs {
-    /// The size of the memory array.
-    #[clap(long, default_value_t = 30000)]
-    size: usize,
-
-    /// The initial pointer position.
-    #[clap(long, default_value_t = 0)]
-    ptr: usize,
-
-    /// The value to if translate "\r\n" to "\n" (0x0A).
-    #[clap(long, default_value_t = true)]
-    translate_newline: bool,
-
-    /// The value to set what EOF is converted to.
-    #[clap(long, default_value_t = EofValue::Zero, value_enum)]
-    eof_value: EofValue,
-
-    /// The value to set which endian interprets the cell as character(s).
-    #[clap(long, default_value_t = Endian::Little, value_enum)]
-    endian: Endian,
-}
-
-impl From<BfSettingArgs> for BfSetting {
-    fn from(val: BfSettingArgs) -> Self {
-        let BfSettingArgs{size, ptr, translate_newline, eof_value, endian} = val;
-        BfSetting{size, ptr, translate_newline, eof_value, endian}
-    }
-}
-
-/// The main func of Crain in effect.
-///
-/// The main func. Most of the logic is command-line argument processing.
-pub fn main_func() -> ExitCode {
-    let command = Args::parse().command;
-    let err = match command {
-        Commands::Run {mode, setting} => {
-            if let RunMode{ file: Some(file), .. } = mode {
-                interp::eval_file(&file, setting.into())
-            } else if let RunMode{ string: Some(string), .. } = mode {
-                interp::eval_string(&string, setting.into())
-            } else {
-                unreachable!()
-            }
-        }
-    };
-
-    if let Err(e) = err {
-        eprintln!("{e}");
-        ExitCode::FAILURE
-    } else {
-        ExitCode::SUCCESS
-    }
-}
-
-#[test]
-fn verify_cli() {
-    use clap::CommandFactory;
-    Args::command().debug_assert();
-}
