@@ -3,9 +3,9 @@ use std::io::{BufReader, Cursor};
 use std::path::PathBuf;
 
 use super::*;
-use crate::bfic::BfCode::*;
+use crate::ir::BfIr::*;
 use crate::bfsetting::BfSetting;
-use crate::celltype::*;
+use crate::cell::*;
 use crate::error::{InterpError, VmError};
 
 /// The virtual machine used to run Brainfuck programs.

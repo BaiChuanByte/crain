@@ -1,14 +1,14 @@
-use crate::bfic::BfCode;
-use crate::celltype::BfCell;
+use crate::ir::BfIr;
+use crate::cell::BfCell;
 use crate::error::*;
 
-impl<T> BfCode<T>
+impl<T> BfIr<T>
 where
     T: BfCell,
 {
     /// Parse the brainfuck code.
     ///
-    /// Parse the brainfuck code, convert it into BfCode intermediate code.
+    /// Parse the brainfuck code, convert it into BfIr intermediate code.
     ///
     /// # Failures
     ///
@@ -19,11 +19,11 @@ where
     /// # Examples
     /// ```rust
     /// use std::io::BufReader;
-    /// use crain::bfic::BfCode::{self, *};
+    /// use crain::bfic::BfIr::{self, *};
     /// use crain::celltype::Cell8;
     ///
     /// let code = BufReader::new("+-<>,.[]".as_bytes());
-    /// let ic = BfCode::<Cell8>::parse(code)?;
+    /// let ic = BfIr::<Cell8>::parse(code)?;
     ///
     /// assert_eq!(
     ///     ic,
@@ -32,7 +32,7 @@ where
     /// );
     /// # Ok::<(), crain::ParseError>(())
     /// ```
-    pub fn parse(source_codes: impl std::io::BufRead) -> Result<Vec<BfCode<T>>, ParseError> {
+    pub fn parse(source_codes: impl std::io::BufRead) -> Result<Vec<BfIr<T>>, ParseError> {
         let mut codes = vec![];
         let mut stack: Vec<(usize, usize, usize)> = vec![];
 
@@ -83,22 +83,22 @@ where
             row += 1;
 
             match byte {
-                b'+' => wrapping_push!(codes, BfCode::<T>::AddCell),
-                b'-' => wrapping_push!(codes, BfCode::<T>::SubCell),
-                b'<' => unwrapping_push!(codes, BfCode::<T>::LeftShift),
-                b'>' => unwrapping_push!(codes, BfCode::<T>::RightShift),
-                b',' => codes.push(BfCode::<T>::Input),
-                b'.' => codes.push(BfCode::<T>::Output),
+                b'+' => wrapping_push!(codes, BfIr::<T>::AddCell),
+                b'-' => wrapping_push!(codes, BfIr::<T>::SubCell),
+                b'<' => unwrapping_push!(codes, BfIr::<T>::LeftShift),
+                b'>' => unwrapping_push!(codes, BfIr::<T>::RightShift),
+                b',' => codes.push(BfIr::<T>::Input),
+                b'.' => codes.push(BfIr::<T>::Output),
 
                 b'[' => {
                     stack.push((codes.len(), line, row));
-                    codes.push(BfCode::<T>::Jz(usize::MAX));
+                    codes.push(BfIr::<T>::Jz(usize::MAX));
                 }
 
                 b']' => {
                     if let Some(left_bracket_data) = stack.pop() {
-                        codes[left_bracket_data.0] = BfCode::<T>::Jz(codes.len());
-                        codes.push(BfCode::<T>::Jnz(left_bracket_data.0));
+                        codes[left_bracket_data.0] = BfIr::<T>::Jz(codes.len());
+                        codes.push(BfIr::<T>::Jnz(left_bracket_data.0));
                     } else {
                         return Err(ParseError::MismatchedBracket {
                             bracket: ']',
@@ -127,8 +127,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::bfic::BfCode::*;
-    use crate::celltype::Cell8;
+    use crate::ir::BfIr::*;
+    use crate::cell::Cell8;
     use std::io::BufReader;
 
     #[test]
@@ -136,7 +136,7 @@ mod tests {
         let error_func = |e| panic!("Parse Error: {}", e);
         let ok_func = |v| v;
         let new_frame = |s: &str| {
-            BfCode::<Cell8>::parse(BufReader::new(s.as_bytes())).map_or_else(error_func, ok_func)
+            BfIr::<Cell8>::parse(BufReader::new(s.as_bytes())).map_or_else(error_func, ok_func)
         };
 
         assert_eq!(

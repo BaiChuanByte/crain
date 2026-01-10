@@ -14,14 +14,14 @@
 //! dedicated to providing a fast, reliable, and ready-to-use execution environment
 //! for brainfuck programs.
 
-mod bfic;
+mod ir;
 mod bfsetting;
-mod celltype;
+mod cell;
 mod error;
 mod interp;
 
 use bfsetting::{BfSetting, Endian, EofValue};
-use celltype::*;
+use cell::*;
 use error::*;
 use interp::{eval_file, eval_string};
 

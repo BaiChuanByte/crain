@@ -1,5 +1,5 @@
-use crate::bfic::BfCode;
-use crate::celltype::BfCell;
+use crate::ir::BfIr;
+use crate::cell::BfCell;
 use crate::error::ParseError;
 
 /// An abstraction of a complete brainfuck program.
@@ -9,7 +9,7 @@ use crate::error::ParseError;
 /// The state during execution (such as the program counter) is also stored within this structure.
 #[derive(Debug)]
 pub struct BfFrame<T: BfCell> {
-    codes: Vec<BfCode<T>>,
+    codes: Vec<BfIr<T>>,
     pc: usize, // problem counter
 }
 
@@ -37,13 +37,13 @@ where
     /// ```
     pub fn new(source_codes: impl std::io::BufRead) -> Result<BfFrame<T>, ParseError> {
         Ok(Self {
-            codes: BfCode::parse(source_codes)?,
+            codes: BfIr::parse(source_codes)?,
             pc: 0,
         })
     }
 
     /// Returns the preprocessed brainfuck program in the frame.
-    pub fn codes(&self) -> &Vec<BfCode<T>> {
+    pub fn codes(&self) -> &Vec<BfIr<T>> {
         &(self.codes)
     }
     /// Returns the program counter in the frame.
