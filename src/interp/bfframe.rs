@@ -35,7 +35,7 @@ where
     /// let frame = BfFrame::<Cell8>::new(Cursor::new("+-<>".to_string()))?;
     /// # Ok::<(), crain::ParseError>(())
     /// ```
-    pub fn new(source_codes: impl std::io::BufRead) -> Result<BfFrame<T>, ParseError> {
+    pub fn new(source_codes: impl std::io::BufRead) -> Result<Self, ParseError> {
         Ok(Self {
             codes: BfIr::parse(source_codes)?,
             pc: 0,
@@ -43,15 +43,15 @@ where
     }
 
     /// Returns the preprocessed brainfuck program in the frame.
-    #[must_use] pub fn codes(&self) -> &Vec<BfIr<T>> {
+    #[must_use] pub const fn codes(&self) -> &Vec<BfIr<T>> {
         &(self.codes)
     }
     /// Returns the program counter in the frame.
-    #[must_use] pub fn pc(&self) -> &usize {
+    #[must_use] pub const fn pc(&self) -> &usize {
         &(self.pc)
     }
     /// Modify the program counter to implement jump.
-    pub fn jump(&mut self, new_pc: usize) {
+    pub const fn jump(&mut self, new_pc: usize) {
         self.pc = new_pc;
     }
 }

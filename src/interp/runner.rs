@@ -32,7 +32,7 @@ impl<T: BfCell> BfVm<T> {
     pub fn new(setting: BfSetting) -> Self {
         assert!((setting.size != 0), "ValueError: Illegal parameter \"size\"");
         assert!((setting.ptr < setting.size), "ValueError: Illegal parameter \"ptr\"");
-        BfVm {
+        Self {
             array: vec![T::ZERO; setting.size],
             ptr: setting.ptr,
             setting,

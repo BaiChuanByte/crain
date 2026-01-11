@@ -32,8 +32,8 @@ where
     /// );
     /// # Ok::<(), crain::ParseError>(())
     /// ```
-    pub fn parse(source_codes: impl std::io::BufRead) -> Result<Vec<BfIr<T>>, ParseError> {
-        let mut codes: Vec<BfIr<T>> = vec![];
+    pub fn parse(source_codes: impl std::io::BufRead) -> Result<Vec<Self>, ParseError> {
+        let mut codes: Vec<Self> = vec![];
         let mut stack: Vec<(usize, usize, usize)> = vec![]; // (pos, line, row)
 
         let mut line = 1usize;
