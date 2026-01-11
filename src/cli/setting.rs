@@ -1,11 +1,11 @@
 use clap::ValueEnum;
-use enum_convert::EnumInto;
-use smart_default::SmartDefault;
+use o2o::o2o;
 
 use crate::bfsetting;
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, ValueEnum)]
-#[enum_into(bfsetting::CellType)]
+#[derive(o2o)]
+#[map_owned(bfsetting::CellType)]
 pub enum CellType {
     /// 8-bit Cell.
     #[default]
@@ -26,7 +26,8 @@ pub enum CellType {
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, ValueEnum)]
-#[enum_into(bfsetting::CellType)]
+#[derive(o2o)]
+#[map_owned(bfsetting::EofValue)]
 pub enum EofValue {
     /// Convert EOF to 0.
     #[default]
@@ -38,7 +39,8 @@ pub enum EofValue {
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, ValueEnum)]
-#[enum_into(bfsetting::CellType)]
+#[derive(o2o)]
+#[map_owned(bfsetting::Endian)]
 pub enum Endian {
     /// Little-endian, where the least significant byte is stored first.
     #[default]
