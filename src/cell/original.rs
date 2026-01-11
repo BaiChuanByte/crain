@@ -1,4 +1,4 @@
-use crate::bfsetting::{BfSetting, EofValue, Endian};
+use crate::bfsetting::{BfSetting, Endian, EofValue};
 
 use super::BfCell;
 
@@ -22,7 +22,7 @@ macro_rules! impl_bfcell {
         impl BfCell for $t {
             const ZERO: Self = 0;
             const ONE: Self = 1;
-            #[allow(clippy::cast_possible_truncation)]  // only 8-128 bits
+            #[allow(clippy::cast_possible_truncation)] // only 8-128 bits
             const BITS: u32 = 8 * (std::mem::size_of::<Self>() as u32);
 
             fn add(&mut self, rhs: Self) {

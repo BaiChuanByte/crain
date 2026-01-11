@@ -1,6 +1,6 @@
 use crate::cell::BfCell;
 use crate::error::ParseError;
-use crate::ir::BfIr::{self, AddCell, SubCell, LeftShift, RightShift, Input, Output, Jz, Jnz};
+use crate::ir::BfIr;
 
 impl<T> BfIr<T>
 where
@@ -74,22 +74,22 @@ where
             }
 
             match byte {
-                b'+' => wrapping_folding!(codes, AddCell),
-                b'-' => wrapping_folding!(codes, SubCell),
-                b'<' => unwrapping_folding!(codes, LeftShift),
-                b'>' => unwrapping_folding!(codes, RightShift),
-                b',' => codes.push(Input),
-                b'.' => codes.push(Output),
+                b'+' => wrapping_folding!(codes, BfIr::AddCell),
+                b'-' => wrapping_folding!(codes, BfIr::SubCell),
+                b'<' => unwrapping_folding!(codes, BfIr::LeftShift),
+                b'>' => unwrapping_folding!(codes, BfIr::RightShift),
+                b',' => codes.push(BfIr::Input),
+                b'.' => codes.push(BfIr::Output),
 
                 b'[' => {
                     stack.push((codes.len(), line, row));
-                    codes.push(Jz(usize::MAX));
+                    codes.push(BfIr::Jz(usize::MAX));
                 }
 
                 b']' => {
                     if let Some((pos, _, _)) = stack.pop() {
-                        codes[pos] = Jz(codes.len());
-                        codes.push(Jnz(pos));
+                        codes[pos] = BfIr::Jz(codes.len());
+                        codes.push(BfIr::Jnz(pos));
                     } else {
                         return Err(ParseError::MismatchedBracket {
                             bracket: ']',
@@ -132,50 +132,50 @@ mod tests {
         assert_eq!(
             new_frame("+-<>,.[]"),
             vec![
-                AddCell(1),
-                SubCell(1),
-                LeftShift(1),
-                RightShift(1),
-                Input,
-                Output,
-                Jz(7),
-                Jnz(6),
+                BfIr::AddCell(1),
+                BfIr::SubCell(1),
+                BfIr::LeftShift(1),
+                BfIr::RightShift(1),
+                BfIr::Input,
+                BfIr::Output,
+                BfIr::Jz(7),
+                BfIr::Jnz(6),
             ]
         );
 
         assert_eq!(
             new_frame("-<<<+++--><++>>>"),
             vec![
-                SubCell(1),
-                LeftShift(3),
-                AddCell(3),
-                SubCell(2),
-                RightShift(1),
-                LeftShift(1),
-                AddCell(2),
-                RightShift(3),
+                BfIr::SubCell(1),
+                BfIr::LeftShift(3),
+                BfIr::AddCell(3),
+                BfIr::SubCell(2),
+                BfIr::RightShift(1),
+                BfIr::LeftShift(1),
+                BfIr::AddCell(2),
+                BfIr::RightShift(3),
             ]
         );
 
         assert_eq!(
             new_frame("[[][[[][[]][]]]]"),
             vec![
-                Jz(15),  // 0
-                Jz(2),   // 1
-                Jnz(1),  // 2
-                Jz(14),  // 3
-                Jz(13),  // 4
-                Jz(6),   // 5
-                Jnz(5),  // 6
-                Jz(10),  // 7
-                Jz(9),   // 8
-                Jnz(8),  // 9
-                Jnz(7),  // 10
-                Jz(12),  // 11
-                Jnz(11), // 12
-                Jnz(4),  // 13
-                Jnz(3),  // 14
-                Jnz(0),  // 15
+                BfIr::Jz(15),  // 0
+                BfIr::Jz(2),   // 1
+                BfIr::Jnz(1),  // 2
+                BfIr::Jz(14),  // 3
+                BfIr::Jz(13),  // 4
+                BfIr::Jz(6),   // 5
+                BfIr::Jnz(5),  // 6
+                BfIr::Jz(10),  // 7
+                BfIr::Jz(9),   // 8
+                BfIr::Jnz(8),  // 9
+                BfIr::Jnz(7),  // 10
+                BfIr::Jz(12),  // 11
+                BfIr::Jnz(11), // 12
+                BfIr::Jnz(4),  // 13
+                BfIr::Jnz(3),  // 14
+                BfIr::Jnz(0),  // 15
             ]
         );
     }

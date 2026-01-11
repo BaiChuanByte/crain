@@ -6,7 +6,7 @@ use super::BfFrame;
 use crate::bfsetting::BfSetting;
 use crate::cell::{BfCell, Cell8};
 use crate::error::{InterpError, VmError};
-use crate::ir::BfIr::{AddCell, SubCell, LeftShift, RightShift, Input, Output, Jz, Jnz};
+use crate::ir::BfIr;
 
 /// The virtual machine used to run Brainfuck programs.
 ///
@@ -30,8 +30,14 @@ impl<T: BfCell> BfVm<T> {
     /// BfVm::<Cell8>::new(BfSetting::default());
     /// ```
     pub fn new(setting: BfSetting) -> Self {
-        assert!((setting.size != 0), "ValueError: Illegal parameter \"size\"");
-        assert!((setting.ptr < setting.size), "ValueError: Illegal parameter \"ptr\"");
+        assert!(
+            (setting.size != 0),
+            "ValueError: Illegal parameter \"size\""
+        );
+        assert!(
+            (setting.ptr < setting.size),
+            "ValueError: Illegal parameter \"ptr\""
+        );
         Self {
             array: vec![T::ZERO; setting.size],
             ptr: setting.ptr,
@@ -83,10 +89,10 @@ impl<T: BfCell> BfVm<T> {
         let cell = &mut self.array[*ptr];
 
         match frame.codes()[*frame.pc()] {
-            AddCell(n) => cell.add(n),
-            SubCell(n) => cell.sub(n),
+            BfIr::AddCell(n) => cell.add(n),
+            BfIr::SubCell(n) => cell.sub(n),
 
-            LeftShift(n) => {
+            BfIr::LeftShift(n) => {
                 if *ptr >= n {
                     *ptr -= n;
                 } else {
@@ -95,7 +101,7 @@ impl<T: BfCell> BfVm<T> {
                     });
                 }
             }
-            RightShift(n) => {
+            BfIr::RightShift(n) => {
                 if len - *ptr > n {
                     *ptr += n;
                 } else {
@@ -105,19 +111,19 @@ impl<T: BfCell> BfVm<T> {
                 }
             }
 
-            Input => cell
+            BfIr::Input => cell
                 .input(bfinput, &self.setting)
                 .map_err(|e| VmError::IO { source: e })?,
-            Output => cell
+            BfIr::Output => cell
                 .output(bfoutput, &self.setting)
                 .map_err(|e| VmError::IO { source: e })?,
 
-            Jz(n) => {
+            BfIr::Jz(n) => {
                 if cell.iszero() {
                     frame.jump(n);
                 }
             }
-            Jnz(n) => {
+            BfIr::Jnz(n) => {
                 if !cell.iszero() {
                     frame.jump(n);
                 }
@@ -259,7 +265,8 @@ mod tests {
             ",
         );
 
-        vm.run(&mut input, &mut output, &mut frame).unwrap_or_else(|e| panic!("Vm Error: {e}"));
+        vm.run(&mut input, &mut output, &mut frame)
+            .unwrap_or_else(|e| panic!("Vm Error: {e}"));
 
         assert_eq!(*output.get_ref(), Vec::<u8>::from("Crain"));
     }

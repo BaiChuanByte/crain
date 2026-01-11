@@ -43,11 +43,13 @@ where
     }
 
     /// Returns the preprocessed brainfuck program in the frame.
-    #[must_use] pub const fn codes(&self) -> &Vec<BfIr<T>> {
+    #[must_use]
+    pub const fn codes(&self) -> &Vec<BfIr<T>> {
         &(self.codes)
     }
     /// Returns the program counter in the frame.
-    #[must_use] pub const fn pc(&self) -> &usize {
+    #[must_use]
+    pub const fn pc(&self) -> &usize {
         &(self.pc)
     }
     /// Modify the program counter to implement jump.
