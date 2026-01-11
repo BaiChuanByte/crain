@@ -103,8 +103,20 @@ name = "crain"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "enum_convert",
  "smart-default",
  "thiserror",
+]
+
+[[package]]
+name = "enum_convert"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a033b1e1733e82f5d9217467c419d0a70f48543e1788a08c268f8a22a82e68c2"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

@@ -1,6 +1,6 @@
-use crate::ir::BfIr;
 use crate::cell::BfCell;
 use crate::error::ParseError;
+use crate::ir::BfIr;
 
 /// An abstraction of a complete brainfuck program.
 ///
@@ -30,7 +30,7 @@ where
     /// ```rust
     /// use std::io::Cursor;
     /// use crain::interp::BfFrame;
-    /// use crain::celltype::Cell8;
+    /// use crain::cell::Cell8;
     ///
     /// let frame = BfFrame::<Cell8>::new(Cursor::new("+-<>".to_string()))?;
     /// # Ok::<(), crain::ParseError>(())

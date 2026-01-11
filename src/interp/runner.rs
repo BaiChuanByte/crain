@@ -3,10 +3,10 @@ use std::io::{BufReader, Cursor};
 use std::path::PathBuf;
 
 use super::*;
-use crate::ir::BfIr::*;
 use crate::bfsetting::BfSetting;
 use crate::cell::*;
 use crate::error::{InterpError, VmError};
+use crate::ir::BfIr::*;
 
 /// The virtual machine used to run Brainfuck programs.
 ///
@@ -26,7 +26,8 @@ impl<T: BfCell> BfVm<T> {
     ///
     /// # Examples
     /// ```rust
-    /// crain::interp::BfVm::<crain::celltype::Cell8>::new(crain::BfSetting::default());
+    /// use crain::*;
+    /// BfVm::<Cell8>::new(BfSetting::default());
     /// ```
     pub fn new(setting: BfSetting) -> Self {
         if setting.size == 0 {
@@ -55,7 +56,7 @@ impl<T: BfCell> BfVm<T> {
     /// ```rust
     /// use std::io::Cursor;
     /// use crain::BfSetting;
-    /// use crain::celltype::Cell8;
+    /// use crain::cell::Cell8;
     /// use crain::interp::{BfFrame, BfVm};
     ///
     /// let mut frame = BfFrame::<Cell8>::new(Cursor::new(
@@ -145,7 +146,7 @@ impl<T: BfCell> BfVm<T> {
     /// ```rust
     /// use std::io::Cursor;
     /// use crain::BfSetting;
-    /// use crain::celltype::Cell8;
+    /// use crain::cell::Cell8;
     /// use crain::interp::{BfFrame, BfVm};
     ///
     /// let mut frame = BfFrame::<Cell8>::new(Cursor::new(

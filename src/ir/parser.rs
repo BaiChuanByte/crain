@@ -1,6 +1,6 @@
-use crate::ir::BfIr::{self, *};
 use crate::cell::BfCell;
 use crate::error::*;
+use crate::ir::BfIr::{self, *};
 
 impl<T> BfIr<T>
 where
@@ -19,8 +19,8 @@ where
     /// # Examples
     /// ```rust
     /// use std::io::BufReader;
-    /// use crain::bfic::BfIr::{self, *};
-    /// use crain::celltype::Cell8;
+    /// use crain::ir::BfIr::{self, *};
+    /// use crain::cell::Cell8;
     ///
     /// let code = BufReader::new("+-<>,.[]".as_bytes());
     /// let ic = BfIr::<Cell8>::parse(code)?;

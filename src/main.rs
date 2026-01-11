@@ -14,14 +14,16 @@
 //! dedicated to providing a fast, reliable, and ready-to-use execution environment
 //! for brainfuck programs.
 
-mod ir;
 mod bfsetting;
 mod cell;
+mod cli;
 mod error;
 mod interp;
+mod ir;
 
-use bfsetting::{BfSetting, Endian, EofValue};
+use bfsetting::BfSetting;
 use cell::*;
+use cli::{CellType, Endian, EofValue};
 use error::*;
 use interp::{eval_file, eval_string};
 
@@ -74,12 +76,16 @@ struct BfSettingArgs {
     #[clap(long, default_value_t = true)]
     translate_newline: bool,
 
+    /// The size of the memory array.
+    #[clap(long, default_value_t, value_enum)]
+    cell: CellType,
+
     /// The value to set what EOF is converted to.
-    #[clap(long, default_value_t = EofValue::Zero, value_enum)]
+    #[clap(long, default_value_t, value_enum)]
     eof_value: EofValue,
 
     /// The value to set which endian interprets the cell as character(s).
-    #[clap(long, default_value_t = Endian::Little, value_enum)]
+    #[clap(long, default_value_t, value_enum)]
     endian: Endian,
 }
 
@@ -91,13 +97,15 @@ impl From<BfSettingArgs> for BfSetting {
             translate_newline,
             eof_value,
             endian,
+            cell,
         } = val;
         BfSetting {
             size,
             ptr,
             translate_newline,
-            eof_value,
-            endian,
+            eof_value: eof_value.into(),
+            endian: endian.into(),
+            cell: cell.into(),
         }
     }
 }

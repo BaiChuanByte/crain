@@ -1,9 +1,10 @@
-use clap::ValueEnum;
-
 use smart_default::SmartDefault;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, SmartDefault)]
 pub struct BfSetting {
+    /// The type of the cell.
+    pub cell: CellType,
+
     /// The size of the memory array.
     #[default = 30000]
     pub size: usize,
@@ -17,17 +18,31 @@ pub struct BfSetting {
     pub translate_newline: bool,
 
     /// The value to set what EOF is converted to.
-    #[default(EofValue::Zero)]
     pub eof_value: EofValue,
 
     /// The value to set which endian interprets the cell as character(s).
-    #[default(Endian::Little)]
     pub endian: Endian,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, ValueEnum)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
+pub enum CellType {
+    /// 8-bit Cell.
+    #[default]
+    Cell8,
+    /// 16-bit Cell.
+    Cell16,
+    /// 32-bit Cell.
+    Cell32,
+    /// 64-bit Cell.
+    Cell64,
+    /// 128-bit Cell.
+    Cell128,
+}
+
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum EofValue {
     /// Convert EOF to 0.
+    #[default]
     Zero,
     /// Convert EOF to -1 (for example, 0xFF in an 8-bit cell).
     NegativeOne,
@@ -35,9 +50,10 @@ pub enum EofValue {
     NoWrite,
 }
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, ValueEnum)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub enum Endian {
     /// Little-endian, where the least significant byte is stored first.
+    #[default]
     Little,
     /// Big-endian, where the most significant byte is stored first.
     Big,
