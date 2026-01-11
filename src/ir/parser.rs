@@ -1,6 +1,6 @@
 use crate::cell::BfCell;
-use crate::error::*;
-use crate::ir::BfIr::{self, *};
+use crate::error::ParseError;
+use crate::ir::BfIr::{self, AddCell, SubCell, LeftShift, RightShift, Input, Output, Jz, Jnz};
 
 impl<T> BfIr<T>
 where
@@ -8,9 +8,9 @@ where
 {
     /// Parse the brainfuck code.
     ///
-    /// Parse the brainfuck code, convert it into BfIr intermediate code.
+    /// Parse the brainfuck code, convert it into `BfIr` intermediate code.
     ///
-    /// # Failures
+    /// # Errors
     ///
     /// The function will return a `ParseError` if:
     /// 1. An error occurs during an IO operation.
@@ -123,7 +123,7 @@ mod tests {
 
     #[test]
     fn test_bfcode_parse() {
-        let error_func = |e| panic!("Parse Error: {}", e);
+        let error_func = |e| panic!("Parse Error: {e}");
         let ok_func = |v| v;
         let new_frame = |s: &str| {
             BfIr::<Cell8>::parse(BufReader::new(s.as_bytes())).map_or_else(error_func, ok_func)

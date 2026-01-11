@@ -33,7 +33,7 @@ pub trait BfCell: Clone + Copy + ToString + From<u8> + Eq + PartialEq {
 
     /// Reads bytes of the same length as `self` from the input stream and writes them into `self`.
     ///
-    /// # Failures
+    /// # Errors
     /// A `std::io::Error` will be returned if it occurs during the reading process.
     fn input(
         &mut self,
@@ -42,7 +42,7 @@ pub trait BfCell: Clone + Copy + ToString + From<u8> + Eq + PartialEq {
     ) -> Result<(), std::io::Error>;
     /// Writes `self` to the output stream.
     ///
-    /// # Failures
+    /// # Errors
     /// A `std::io::Error` will be returned if it occurs during the writing process.
     fn output(self, bfoutput: &mut impl Write, setting: &BfSetting) -> Result<(), std::io::Error>;
 }

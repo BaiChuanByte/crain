@@ -2,11 +2,11 @@ use std::fs::File;
 use std::io::{BufReader, Cursor};
 use std::path::PathBuf;
 
-use super::*;
+use super::BfFrame;
 use crate::bfsetting::BfSetting;
-use crate::cell::*;
+use crate::cell::{BfCell, Cell8};
 use crate::error::{InterpError, VmError};
-use crate::ir::BfIr::*;
+use crate::ir::BfIr::{AddCell, SubCell, LeftShift, RightShift, Input, Output, Jz, Jnz};
 
 /// The virtual machine used to run Brainfuck programs.
 ///
@@ -19,7 +19,7 @@ pub struct BfVm<T: BfCell> {
 }
 
 impl<T: BfCell> BfVm<T> {
-    /// News a BfVm.
+    /// News a `BfVm`.
     ///
     /// # Panics
     /// it will cause a panic if you set size to zero, or set ptr to beyond the range of the array.
@@ -30,12 +30,8 @@ impl<T: BfCell> BfVm<T> {
     /// BfVm::<Cell8>::new(BfSetting::default());
     /// ```
     pub fn new(setting: BfSetting) -> Self {
-        if setting.size == 0 {
-            panic!("ValueError: Illegal parameter \"size\"")
-        }
-        if setting.ptr >= setting.size {
-            panic!("ValueError: Illegal parameter \"ptr\"")
-        }
+        assert!((setting.size != 0), "ValueError: Illegal parameter \"size\"");
+        assert!((setting.ptr < setting.size), "ValueError: Illegal parameter \"ptr\"");
         BfVm {
             array: vec![T::ZERO; setting.size],
             ptr: setting.ptr,
@@ -43,14 +39,14 @@ impl<T: BfCell> BfVm<T> {
         }
     }
 
-    /// Step through a BfFrame.
+    /// Step through a `BfFrame`.
     ///
-    /// Run a BfFrame, but only for a single step.
+    /// Run a `BfFrame`, but only for a single step.
     ///
-    /// # Failures
+    /// # Errors
     /// The function will return a `VmError` if:
     /// 1. An error occurs during an IO operation.
-    /// 2. An operation not allowed by BfVm is performed.
+    /// 2. An operation not allowed by `BfVm` is performed.
     ///
     /// # Examples
     /// ```rust
@@ -118,12 +114,12 @@ impl<T: BfCell> BfVm<T> {
 
             Jz(n) => {
                 if cell.iszero() {
-                    frame.jump(n)
+                    frame.jump(n);
                 }
             }
             Jnz(n) => {
                 if !cell.iszero() {
-                    frame.jump(n)
+                    frame.jump(n);
                 }
             }
         }
@@ -133,14 +129,14 @@ impl<T: BfCell> BfVm<T> {
         Ok(())
     }
 
-    /// Run a BfFrame.
+    /// Run a `BfFrame`.
     ///
-    /// Run the BfFrame until all the remaining code has been executed.
+    /// Run the `BfFrame` until all the remaining code has been executed.
     ///
-    /// # Failures
+    /// # Errors
     /// The function will return a `VmError` if:
     /// 1. An error occurs during an IO operation.
-    /// 2. An operation not allowed by BfVm is performed.
+    /// 2. An operation not allowed by `BfVm` is performed.
     ///
     /// # Examples
     /// ```rust
@@ -183,11 +179,11 @@ impl<T: BfCell> BfVm<T> {
 ///
 /// Open a file by name and eval it.
 ///
-/// # Failures
+/// # Errors
 /// The function will return a `VmError` if:
 /// 1. An error occurs during an IO operation.
 /// 2. A syntax error in the brainfuck code (such as mismatched brackets).
-/// 3. An operation not allowed by BfVm is performed.
+/// 3. An operation not allowed by `BfVm` is performed.
 ///
 /// # Example
 /// ```rust, no_run
@@ -209,11 +205,11 @@ pub fn eval_file(name: &PathBuf, setting: BfSetting) -> Result<(), InterpError> 
 ///
 /// Get a string and eval it.
 ///
-/// # Failures
+/// # Errors
 /// The function will return a `VmError` if:
 /// 1. An error occurs during an IO operation.
 /// 2. A syntax error in the brainfuck code (such as mismatched brackets).
-/// 3. An operation not allowed by BfVm is performed.
+/// 3. An operation not allowed by `BfVm` is performed.
 ///
 /// # Example
 /// ```rust
@@ -263,8 +259,7 @@ mod tests {
             ",
         );
 
-        vm.run(&mut input, &mut output, &mut frame)
-            .map_or_else(|e| panic!("Vm Error: {e}"), |v| v);
+        vm.run(&mut input, &mut output, &mut frame).unwrap_or_else(|e| panic!("Vm Error: {e}"));
 
         assert_eq!(*output.get_ref(), Vec::<u8>::from("Crain"));
     }

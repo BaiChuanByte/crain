@@ -17,9 +17,9 @@ impl<T> BfFrame<T>
 where
     T: BfCell,
 {
-    /// News a BfFrame.
+    /// News a `BfFrame`.
     ///
-    /// # Failures
+    /// # Errors
     ///
     /// The function will return a `ParseError` if:
     /// 1. An error occurs during an IO operation.
@@ -43,15 +43,15 @@ where
     }
 
     /// Returns the preprocessed brainfuck program in the frame.
-    pub fn codes(&self) -> &Vec<BfIr<T>> {
+    #[must_use] pub fn codes(&self) -> &Vec<BfIr<T>> {
         &(self.codes)
     }
     /// Returns the program counter in the frame.
-    pub fn pc(&self) -> &usize {
+    #[must_use] pub fn pc(&self) -> &usize {
         &(self.pc)
     }
     /// Modify the program counter to implement jump.
     pub fn jump(&mut self, new_pc: usize) {
-        self.pc = new_pc
+        self.pc = new_pc;
     }
 }

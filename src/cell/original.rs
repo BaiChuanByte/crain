@@ -1,6 +1,6 @@
-use crate::bfsetting::*;
+use crate::bfsetting::{BfSetting, EofValue, Endian};
 
-use super::*;
+use super::BfCell;
 
 /// 8-bit Cell. It is essentially a wrapper around u8.
 pub type Cell8 = u8;
@@ -22,6 +22,7 @@ macro_rules! impl_bfcell {
         impl BfCell for $t {
             const ZERO: Self = 0;
             const ONE: Self = 1;
+            #[allow(clippy::cast_possible_truncation)]  // only 8-128 bits
             const BITS: u32 = 8 * (std::mem::size_of::<Self>() as u32);
 
             fn add(&mut self, rhs: Self) {
