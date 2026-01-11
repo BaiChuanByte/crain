@@ -1,18 +1,4 @@
-//! Crain -- A brainfuck compiler/interpreter/tool.
-//!
-//!
-//! ```brainfuck
-//!  ++++  +++++    +[   - >    +
-//! +    + +    +  +  >  - ->   +
-//! +      +    < <    < ] > +  +
-//! +      ++++.  [->++> + <  < ]
-//! >    . >   .  <    - - -   --
-//!  ----  .    + +    + + +    .
-//! ```
-//!
-//! Crain is a brainfuck compiler/interpreter/development tool written in Rust,
-//! dedicated to providing a fast, reliable, and ready-to-use execution environment
-//! for brainfuck programs.
+#![doc = include_str!("../README.md")]
 
 pub mod bfsetting;
 pub mod cell;
